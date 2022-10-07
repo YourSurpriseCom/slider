@@ -1,0 +1,35 @@
+{
+  "name": "slider",
+  "version": "0.1.0",
+  "description": "Basic slider using modern Javascript and CSS",
+  "main": "dist/Slider.js",
+  "module": "dist/module.js",
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.21",
+    "typescript": "^4.8.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf ./dist && rollup -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/YourSurpriseCom/slider.git"
+  },
+  "keywords": [
+    "slider",
+    "modern",
+    "scroll",
+    "snap",
+    "touch"
+  ],
+  "author": "Frank de Rooij",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YourSurpriseCom/slider/issues"
+  },
+  "homepage": "https://github.com/YourSurpriseCom/slider#readme"
+}
