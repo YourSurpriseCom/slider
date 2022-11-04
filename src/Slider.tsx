@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef, useEffect, Children, useCallback } from 'react';
 import type { PropsWithChildren } from 'react';
-import { useRef, useEffect, Children, useCallback } from 'react';
-import './UpsellSlider.scss';
+import '@testing-library/jest-dom/extend-expect';
+import './Slider.scss';
 
 enum Visbility {
     FULL,
@@ -20,19 +20,59 @@ interface SlideVisibilityEntry {
 }
 
 export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
-    const container = useRef<HTMLDivElement>(null);
+    const slides = useRef<SlideVisibilityEntry[]>([]);
+    const wrapper = useRef<HTMLDivElement>(null);
+    const visibleSlideIndices = useRef<number[]>([]);
+
     const arrowPrevRef = useRef<HTMLButtonElement>(null);
     const arrowNextRef = useRef<HTMLButtonElement>(null);
-    const slides = useRef<SlideVisibilityEntry[]>([]);
-    const visibleSlideIndices = useRef<number[]>([]);
-    const moreContentFade = useRef<HTMLDivElement>(null);
 
-    const isSliderScrollable = useCallback(() => {
-        if (!container.current) {
-            return false;
+    const moreContentFade = useRef<HTMLDivElement>(null);
+    const lessContentFade = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const currentContainer = wrapper.current;
+
+        if (!currentContainer) {
+            return () => {};
         }
 
-        return container.current.scrollWidth > container.current.clientWidth;
+        let mousePosition = {
+            left: 0, top: 0, x: 0, y: 0,
+        };
+
+        const mouseMoveHandler = (event: MouseEvent) => {
+            currentContainer.scrollLeft = mousePosition.left - (event.clientX - mousePosition.x);
+        };
+
+        const mouseUpHandler = () => {
+            currentContainer.removeEventListener('mousemove', mouseMoveHandler);
+            currentContainer.removeEventListener('mouseup', mouseUpHandler);
+            currentContainer.classList.remove('is-dragging');
+        };
+
+        const mouseDownHandler = (e: MouseEvent) => {
+            mousePosition = {
+                left: currentContainer.scrollLeft,
+                top: currentContainer.scrollTop,
+                x: e.clientX,
+                y: e.clientY,
+            };
+
+            // Add the mouseup event listener to the document, so we won't miss it when the event is triggered on another element
+            document?.addEventListener('mouseup', mouseUpHandler);
+            currentContainer.addEventListener('mousemove', mouseMoveHandler);
+            currentContainer.classList.add('is-dragging');
+        };
+
+        currentContainer.addEventListener('mousedown', mouseDownHandler);
+
+        return () => {
+            document?.removeEventListener('mouseup', mouseUpHandler);
+            currentContainer.removeEventListener('mousedown', mouseDownHandler);
+            currentContainer.removeEventListener('mousemove', mouseMoveHandler);
+            currentContainer.classList.remove('is-dragging');
+        };
     }, []);
 
     const addSlide = (node: HTMLDivElement, index: number) => {
@@ -42,8 +82,29 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
         };
     };
 
-    const getFirstVisibleSlideIndex = (): number => visibleSlideIndices.current[0] ?? 0;
-    const getLastVisibleSlideIndex = (): number => visibleSlideIndices.current[visibleSlideIndices.current.length - 1] ?? 0;
+    const getFirstVisibleSlideIndex = (): number => visibleSlideIndices.current[0] ?? -1;
+    const getLastVisibleSlideIndex = (): number => visibleSlideIndices.current[visibleSlideIndices.current.length - 1] ?? -1;
+    const setControlsVisibility = useCallback(() => {
+        const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
+
+        if (arrowNextRef.current && arrowPrevRef.current) {
+            arrowNextRef.current.classList.toggle('hidden', lastSlideFullyVisible);
+            arrowNextRef.current.ariaHidden = String(lastSlideFullyVisible);
+
+            arrowPrevRef.current.classList.toggle('hidden', getFirstVisibleSlideIndex() === 0);
+            arrowPrevRef.current.ariaHidden = String(getFirstVisibleSlideIndex() === 0);
+        }
+
+        if (moreContentFade.current) {
+            moreContentFade.current.classList.toggle('hidden', lastSlideFullyVisible);
+            moreContentFade.current.ariaHidden = String(lastSlideFullyVisible);
+        }
+
+        if (lessContentFade.current) {
+            lessContentFade.current.classList.toggle('hidden', getFirstVisibleSlideIndex() === 0);
+            lessContentFade.current.ariaHidden = String(getFirstVisibleSlideIndex() === 0);
+        }
+    }, []);
 
     const getVisibilityByIntersectionRatio = (intersectionRatio: number) => {
         if (intersectionRatio >= 0.9) {
@@ -58,9 +119,11 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
     };
 
     useEffect(() => {
-        if (!container.current) {
+        if (!wrapper.current) {
             return () => {};
         }
+
+        setControlsVisibility();
 
         const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
             entries.forEach((entry: IntersectionObserverEntry) => {
@@ -70,64 +133,78 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
                 if (getVisibilityByIntersectionRatio(entry.intersectionRatio) === Visbility.FULL) {
                     visibleSlideIndices.current.push(index);
                 } else {
-                    // todo: this can probably be made more efficient, we filter because delete leaves an empty slot in the array
                     visibleSlideIndices.current = visibleSlideIndices.current.filter((slideIndex) => slideIndex !== index);
                 }
             });
 
             // Make sure there are no duplicate visible slides, then sort to retain proper order
             visibleSlideIndices.current = [...new Set(visibleSlideIndices.current)].sort();
-
-            if (arrowNextRef.current && arrowPrevRef.current) {
-                const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
-
-                arrowNextRef.current.classList.toggle('hidden', !isSliderScrollable || lastSlideFullyVisible);
-                arrowPrevRef.current.classList.toggle('hidden', !isSliderScrollable || getFirstVisibleSlideIndex() === 0);
-
-                if (moreContentFade.current) {
-                    moreContentFade.current.classList.toggle('hidden', !isSliderScrollable || lastSlideFullyVisible);
-                }
-            }
+            setControlsVisibility();
         };
 
-        const intersectionObserver = new IntersectionObserver(intersectionCallback, { root: container.current, threshold: [0, 0.5, 0.9] });
+        const intersectionObserver = new IntersectionObserver(intersectionCallback, {
+            root: wrapper.current,
+            threshold: [0, 0.5, 0.9],
+        });
 
         slides.current.forEach(({ element }) => intersectionObserver.observe(element));
 
         return () => intersectionObserver.disconnect();
-    }, [container, isSliderScrollable]);
+    }, [wrapper, setControlsVisibility]);
 
     const navigate = (direction: NavigationDirection) => {
-        if (!container.current) {
+        if (!wrapper.current) {
             return;
         }
 
-        const targetSlideIndex = direction === NavigationDirection.PREV ? getFirstVisibleSlideIndex() - 1 : getFirstVisibleSlideIndex() + 1;
+        const targetSlideIndex = direction === NavigationDirection.PREV ? getFirstVisibleSlideIndex() - 1 : getLastVisibleSlideIndex() + 1;
         const targetSlide = slides.current[targetSlideIndex];
+        let scrollLeft = 0;
 
         if (!targetSlide) {
             return;
         }
 
-        // Safari does not support .scrollIntoView with options
-        container.current.scrollTo({
-            behavior: 'smooth',
-            left: targetSlide.element.offsetLeft - container.current.offsetLeft,
-        });
+        if (direction === NavigationDirection.PREV) {
+            scrollLeft = targetSlide.element.offsetLeft - wrapper.current.offsetLeft - wrapper.current.clientWidth + targetSlide.element.clientWidth;
+        } else {
+            scrollLeft = targetSlide.element.offsetLeft - wrapper.current.offsetLeft;
+        }
+
+        wrapper.current.scrollTo({ behavior: 'smooth', left: scrollLeft, top: 0 });
     };
 
     return (
-        <div className="scrollr-container">
-            <button style={{ left: 0, position: 'absolute', top: '50%' }} ref={arrowPrevRef} onClick={() => navigate(NavigationDirection.PREV)}>Prev</button>
-            <div className="more-content-fade" ref={ moreContentFade }/>
-            <div className="scrollr" ref={container}>
+        <div className="slider">
+            <div className="slider__wrapper" role="list" ref={wrapper}>
                 {Children.map(children, (child, index: number) => (
-                    <div key={index} data-slide-index={index} ref={(node) => { if (node) { addSlide(node, index); } }}>
+                    <div className="slider__wrapper__slide" role="listitem" key={index} data-slide-index={index} ref={(node) => { if (node) { addSlide(node, index); } }}>
                         {child}
                     </div>
                 ))}
             </div>
-            <button style={{ position: 'absolute', right: 0, top: '50%' }} ref={arrowNextRef} onClick={() => navigate(NavigationDirection.NEXT)}>Next</button>
+
+            <div className="slider__scroll_indicator slider__scroll_indicator--prev-available" data-testid="less-content" ref={lessContentFade} />
+            <div className="slider__scroll_indicator slider__scroll_indicator--next-available" data-testid="more-content" ref={moreContentFade} />
+
+            <button
+                aria-label="Previous slide"
+                type="button"
+                onClick={() => navigate(NavigationDirection.PREV)}
+                ref={arrowPrevRef}
+                className="slider__button slider__button--prev button button--ghost button--clean button--has-icon"
+            >
+                <i className="icon-chevron-left" />
+            </button>
+            <button
+                aria-label="Next slide"
+                type="button"
+                onClick={() => navigate(NavigationDirection.NEXT)}
+                ref={arrowNextRef}
+                className="slider__button slider__button--next button button--ghost button--clean button--has-icon"
+            >
+                <i className="icon-chevron-right" />
+            </button>
         </div>
     );
 };

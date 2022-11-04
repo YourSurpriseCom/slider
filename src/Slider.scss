@@ -1,36 +1,80 @@
-.scrollr {
-  display: flex;
-  flex-direction: row;
-  overflow-x: auto;
+.slider {
   position: relative;
 
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  scroll-padding: 0 0 0 5px;
-
-  div {
-    scroll-snap-align: start;
-  }
-
-  .hidden {
-    display: none;
-  }
-}
-
-.scrollr-container {
-  position: relative;
-
-  > button {
+  &__button {
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
     position: absolute;
-    z-index: 2;
-  }
-}
+    border: solid 1px #434343;
+    display: none;
 
-.more-content-fade {
-  position: absolute;
-  width: 40px;
-  right: 0;
-  height: 100%;
-  background: linear-gradient(to right, rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
-  z-index: 2;
+    @media (hover: hover) {
+      display: initial;
+    }
+
+    &--next {
+      right: 0;
+    }
+
+    &--prev {
+      left: 0;
+    }
+  }
+
+  &__scroll_indicator {
+    pointer-events: none;
+    top: 0;
+    position: absolute;
+    width: 40px;
+    height: 100%;
+
+    @media (hover: hover) {
+      display: none;
+    }
+
+    &--next-available {
+      right: 0;
+      background: linear-gradient(to right, rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+    }
+
+    &--prev-available {
+      left: 0;
+      background: linear-gradient(to left, rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+    }
+  }
+
+  &__wrapper {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    margin: 24px 0;
+    scroll-snap-type: x proximity;
+
+    @media (hover: hover) {
+      scroll-snap-type: initial;
+    }
+
+    &.is-dragging {
+      user-select: none;
+    }
+
+    &:not(.is-dragging) {
+      scroll-behavior: smooth;
+    }
+
+    &__slide {
+      margin-right: 24px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      @media screen and (min-width: 768px) {
+        margin-left: 0;
+      }
+
+      scroll-snap-align: start;
+    }
+  }
 }
