@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, Children, useCallback } from 'react';
 import type { PropsWithChildren } from 'react';
-import '@testing-library/jest-dom/extend-expect';
 import './Slider.scss';
 
 enum Visbility {
