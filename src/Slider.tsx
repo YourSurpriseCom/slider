@@ -1,10 +1,11 @@
-import React, { useRef, useEffect, Children, useCallback } from 'react';
-import type { PropsWithChildren } from 'react';
+import type React from 'react';
+import type { MouseEvent as ReactMouseEvent, PropsWithChildren } from 'react';
+import { useRef, useEffect, Children, useCallback, useState } from 'react';
 import './Slider.scss';
 
 enum Visbility {
     FULL,
-    HALF,
+    PARTIAL,
     NONE,
 }
 
@@ -22,57 +23,95 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement>(null);
     const visibleSlideIndices = useRef<number[]>([]);
+    const partiallyVisibleSlideIndices = useRef<number[]>([]);
+
+    const [isScrollable, setIsScrollable] = useState<boolean>(false);
+    const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [isBlockingClicks, setIsBlockingClicks] = useState<boolean>(false);
+    const [mousePosition, setMousePosition] = useState<{ clientX: number; scrollX: number }>({
+        clientX: 0,
+        scrollX: 0,
+    });
 
     const arrowPrevRef = useRef<HTMLButtonElement>(null);
     const arrowNextRef = useRef<HTMLButtonElement>(null);
 
-    const moreContentFade = useRef<HTMLDivElement>(null);
-    const lessContentFade = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
-        const currentContainer = wrapper.current;
+        const currentWrapper = wrapper.current;
 
-        if (!currentContainer) {
+        if (!currentWrapper) {
             return () => {};
         }
 
-        let mousePosition = {
-            left: 0, top: 0, x: 0, y: 0,
-        };
+        const checkScrollable = () => setIsScrollable(currentWrapper.classList.toggle('is-scrollable', currentWrapper.scrollWidth > currentWrapper.clientWidth));
 
-        const mouseMoveHandler = (event: MouseEvent) => {
-            currentContainer.scrollLeft = mousePosition.left - (event.clientX - mousePosition.x);
-        };
+        window?.addEventListener('resize', checkScrollable);
 
-        const mouseUpHandler = () => {
-            currentContainer.removeEventListener('mousemove', mouseMoveHandler);
-            currentContainer.removeEventListener('mouseup', mouseUpHandler);
-            currentContainer.classList.remove('is-dragging');
-        };
-
-        const mouseDownHandler = (e: MouseEvent) => {
-            mousePosition = {
-                left: currentContainer.scrollLeft,
-                top: currentContainer.scrollTop,
-                x: e.clientX,
-                y: e.clientY,
-            };
-
-            // Add the mouseup event listener to the document, so we won't miss it when the event is triggered on another element
-            document?.addEventListener('mouseup', mouseUpHandler);
-            currentContainer.addEventListener('mousemove', mouseMoveHandler);
-            currentContainer.classList.add('is-dragging');
-        };
-
-        currentContainer.addEventListener('mousedown', mouseDownHandler);
+        checkScrollable();
 
         return () => {
-            document?.removeEventListener('mouseup', mouseUpHandler);
-            currentContainer.removeEventListener('mousedown', mouseDownHandler);
-            currentContainer.removeEventListener('mousemove', mouseMoveHandler);
-            currentContainer.classList.remove('is-dragging');
+            window?.removeEventListener('resize', checkScrollable);
         };
-    }, []);
+    }, [wrapper]);
+
+    useEffect(() => {
+        wrapper.current?.classList.toggle('is-scrollable', isScrollable);
+    }, [isScrollable]);
+
+    useEffect(() => {
+        wrapper.current?.classList.toggle('is-dragging', isDragging);
+
+        const onDocumentMouseUp = (event: MouseEvent) => {
+            event.stopPropagation();
+            event.preventDefault();
+
+            setIsBlockingClicks(false);
+            setIsDragging(false);
+        };
+
+        if (isDragging) {
+            document?.addEventListener('mouseup', onDocumentMouseUp);
+        }
+
+        return () => {
+            document?.removeEventListener('mouseup', onDocumentMouseUp);
+        };
+    }, [isDragging]);
+
+    const blockChildClickHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
+        if (isBlockingClicks) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
+        setIsBlockingClicks(false);
+    };
+
+    const mouseUpHandler = () => {
+        setIsDragging(false);
+    };
+
+    const mouseDownHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
+        setMousePosition({
+            ...mousePosition,
+            clientX: event.clientX,
+            scrollX: wrapper.current?.scrollLeft ?? 0,
+        });
+
+        setIsDragging(true);
+    };
+
+    const mouseMoveHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
+        if (!wrapper.current || !isDragging) {
+            return;
+        }
+
+        if (Math.abs(mousePosition.clientX - event.clientX) > 5) {
+            setIsBlockingClicks(true);
+        }
+
+        wrapper.current.scrollLeft = mousePosition.scrollX + mousePosition.clientX - event.clientX;
+    };
 
     const addSlide = (node: HTMLDivElement, index: number) => {
         slides.current[index] = {
@@ -81,29 +120,24 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
         };
     };
 
-    const getFirstVisibleSlideIndex = (): number => visibleSlideIndices.current[0] ?? -1;
-    const getLastVisibleSlideIndex = (): number => visibleSlideIndices.current[visibleSlideIndices.current.length - 1] ?? -1;
+    const getFirstVisibleSlideIndex = (): number => visibleSlideIndices.current[0] ?? partiallyVisibleSlideIndices.current[0] ?? -1;
+
+    const getLastVisibleSlideIndex = (): number => visibleSlideIndices.current[visibleSlideIndices.current.length - 1]
+        ?? partiallyVisibleSlideIndices.current[partiallyVisibleSlideIndices.current.length - 1] ?? -1;
+
     const setControlsVisibility = useCallback(() => {
         const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
+        const moreContentAvailable = isScrollable && lastSlideFullyVisible === false;
+        const previousContentAvailable = getFirstVisibleSlideIndex() > 0 && isScrollable;
 
         if (arrowNextRef.current && arrowPrevRef.current) {
-            arrowNextRef.current.classList.toggle('hidden', lastSlideFullyVisible);
-            arrowNextRef.current.ariaHidden = String(lastSlideFullyVisible);
+            arrowNextRef.current.classList.toggle('hidden', moreContentAvailable === false);
+            arrowNextRef.current.ariaHidden = String(moreContentAvailable === false);
 
-            arrowPrevRef.current.classList.toggle('hidden', getFirstVisibleSlideIndex() === 0);
-            arrowPrevRef.current.ariaHidden = String(getFirstVisibleSlideIndex() === 0);
+            arrowPrevRef.current.classList.toggle('hidden', previousContentAvailable === false);
+            arrowPrevRef.current.ariaHidden = String(previousContentAvailable === false);
         }
-
-        if (moreContentFade.current) {
-            moreContentFade.current.classList.toggle('hidden', lastSlideFullyVisible);
-            moreContentFade.current.ariaHidden = String(lastSlideFullyVisible);
-        }
-
-        if (lessContentFade.current) {
-            lessContentFade.current.classList.toggle('hidden', getFirstVisibleSlideIndex() === 0);
-            lessContentFade.current.ariaHidden = String(getFirstVisibleSlideIndex() === 0);
-        }
-    }, []);
+    }, [isScrollable]);
 
     const getVisibilityByIntersectionRatio = (intersectionRatio: number) => {
         if (intersectionRatio >= 0.9) {
@@ -111,7 +145,7 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
         }
 
         if (intersectionRatio >= 0.5) {
-            return Visbility.HALF;
+            return Visbility.PARTIAL;
         }
 
         return Visbility.NONE;
@@ -134,10 +168,18 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
                 } else {
                     visibleSlideIndices.current = visibleSlideIndices.current.filter((slideIndex) => slideIndex !== index);
                 }
+
+                if (getVisibilityByIntersectionRatio(entry.intersectionRatio) === Visbility.PARTIAL) {
+                    partiallyVisibleSlideIndices.current.push(index);
+                } else {
+                    partiallyVisibleSlideIndices.current = partiallyVisibleSlideIndices.current.filter((slideIndex) => slideIndex !== index);
+                }
             });
 
             // Make sure there are no duplicate visible slides, then sort to retain proper order
-            visibleSlideIndices.current = [...new Set(visibleSlideIndices.current)].sort();
+            visibleSlideIndices.current = [...new Set(visibleSlideIndices.current)].sort((a, b) => a - b);
+            partiallyVisibleSlideIndices.current = [...new Set(partiallyVisibleSlideIndices.current)].sort((a, b) => a - b);
+
             setControlsVisibility();
         };
 
@@ -157,6 +199,7 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
         }
 
         const targetSlideIndex = direction === NavigationDirection.PREV ? getFirstVisibleSlideIndex() - 1 : getLastVisibleSlideIndex() + 1;
+
         const targetSlide = slides.current[targetSlideIndex];
         let scrollLeft = 0;
 
@@ -175,34 +218,35 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
 
     return (
         <div className="slider">
-            <div className="slider__wrapper" role="list" ref={wrapper}>
+            <div className="slider__wrapper" role="list" ref={wrapper}
+                onMouseDown={mouseDownHandler}
+                onMouseMove={mouseMoveHandler}
+                onMouseUp={mouseUpHandler}
+                onClickCapture={blockChildClickHandler}
+            >
                 {Children.map(children, (child, index: number) => (
                     <div className="slider__wrapper__slide" role="listitem" key={index} data-slide-index={index} ref={(node) => { if (node) { addSlide(node, index); } }}>
                         {child}
                     </div>
                 ))}
             </div>
-
-            <div className="slider__scroll_indicator slider__scroll_indicator--prev-available" data-testid="less-content" ref={lessContentFade} />
-            <div className="slider__scroll_indicator slider__scroll_indicator--next-available" data-testid="more-content" ref={moreContentFade} />
-
             <button
                 aria-label="Previous slide"
                 type="button"
                 onClick={() => navigate(NavigationDirection.PREV)}
                 ref={arrowPrevRef}
-                className="slider__button slider__button--prev button button--ghost button--clean button--has-icon"
+                className="slider__button slider__button--prev button button--ghost button--clean button--has-icon hidden"
             >
-                <i className="icon-chevron-left" />
+                <i className="icon-chevron-left"/>
             </button>
             <button
                 aria-label="Next slide"
                 type="button"
                 onClick={() => navigate(NavigationDirection.NEXT)}
                 ref={arrowNextRef}
-                className="slider__button slider__button--next button button--ghost button--clean button--has-icon"
+                className="slider__button slider__button--next button button--ghost button--clean button--has-icon hidden"
             >
-                <i className="icon-chevron-right" />
+                <i className="icon-chevron-right"/>
             </button>
         </div>
     );

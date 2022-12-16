@@ -4,21 +4,19 @@ import '@testing-library/jest-dom';
 import { Slider } from './Slider';
 
 const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scrollLeft = 0) => {
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: clientWidth });
+    Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: scrollWidth });
+    Object.defineProperty(HTMLElement.prototype, 'scrollLeft', { configurable: true, value: scrollLeft, writable: true });
+
     render(<Slider>
-        <span key={ 1 }/>
-        <span key={ 2 }/>
-        <span key={ 3 }/>
-        <span key={ 4 }/>
+        <span key={1}/>
+        <span key={2}/>
+        <span key={3}/>
+        <span key={4}/>
     </Slider>);
-
-    const wrapper = screen.getByRole('list');
-
-    Object.defineProperty(wrapper, 'clientWidth', { value: clientWidth });
-    Object.defineProperty(wrapper, 'scrollWidth', { value: scrollWidth });
-    Object.defineProperty(wrapper, 'scrollLeft', { value: scrollLeft });
 };
 
-describe('Slider', () => {
+describe('UpsellSlider', () => {
     let observeSpy: jest.Mock;
     let disconnectSpy: jest.Mock;
     let scrollToSpy: jest.Mock;
@@ -36,6 +34,12 @@ describe('Slider', () => {
         });
         global.IntersectionObserver = mockIntersectionObserver;
         Element.prototype.scrollTo = scrollToSpy;
+    });
+
+    afterEach(() => {
+        Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 0 });
+        Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: 0 });
+        Object.defineProperty(HTMLElement.prototype, 'scrollLeft', { configurable: true, value: 0, writable: true });
     });
 
     it('renders children', () => {
@@ -56,6 +60,18 @@ describe('Slider', () => {
         expect(observeSpy).toHaveBeenCalledTimes(children.length);
     });
 
+    it('sets the container scrollable if the scroll area exceeds the container width', () => {
+        renderSliderWithDimensions(500, 1000);
+
+        expect(screen.getByRole('list')).toHaveClass('is-scrollable');
+    });
+
+    it('does not set the container scrollable if the scroll area does not exceed the container width', () => {
+        renderSliderWithDimensions(500, 400);
+
+        expect(screen.getByRole('list')).not.toHaveClass('is-scrollable');
+    });
+
     it('disconnects the intersection observer on re-render', () => {
         const element = <Slider><span>sup</span></Slider>;
 
@@ -66,42 +82,55 @@ describe('Slider', () => {
         expect(observeSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('sets controls visibility initially', () => {
-        render(<Slider>
-            <span key={ 1 } data-testid="child-1"/>
-            <span key={ 2 } data-testid="child-2"/>
-        </Slider>);
+    describe('controls', () => {
+        it('sets controls visibility initially', () => {
+            renderSliderWithDimensions();
 
-        const nextButton = screen.getByLabelText('Next slide');
-        const prevButton = screen.getByLabelText('Previous slide');
-        const lessContentFade = screen.getByTestId('less-content');
-        const moreContentFade = screen.getByTestId('more-content');
+            const nextButton = screen.getByLabelText('Next slide');
+            const prevButton = screen.getByLabelText('Previous slide');
 
-        expect(prevButton.ariaHidden).toBe('false');
-        expect(nextButton.ariaHidden).toBe('false');
+            expect(prevButton.ariaHidden).toBe('true');
+            expect(nextButton.ariaHidden).toBe('false');
+        });
 
-        expect(lessContentFade.ariaHidden).toBe('false');
-        expect(moreContentFade.ariaHidden).toBe('false');
-    });
+        it('allows scrolling by dragging with the mouse', () => {
+            renderSliderWithDimensions();
 
-    it('allows scrolling by dragging with the mouse', () => {
-        render(<Slider>
-            <span key={1}/>
-            <span key={2}/>
-            <span key={3}/>
-            <span key={4}/>
-        </Slider>);
+            const scrollElement = screen.getByRole('list');
 
-        const scrollElement = screen.getByRole('list');
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseDown(scrollElement);
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseUp(scrollElement);
 
-        // eslint-disable-next-line testing-library/prefer-user-event
-        fireEvent.mouseDown(scrollElement);
-        // eslint-disable-next-line testing-library/prefer-user-event
-        fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
-        // eslint-disable-next-line testing-library/prefer-user-event
-        fireEvent.mouseUp(scrollElement);
+            expect(scrollElement.scrollLeft).toBe(-100);
+        });
 
-        expect(scrollElement.scrollLeft).toBe(-100);
+        it('registers click when not scrolling', async () => {
+            const clickSpy = jest.fn();
+
+            render(<Slider>
+                <span data-testid="1" onClick={clickSpy}/>
+            </Slider>);
+
+            const scrollElement = screen.getByRole('list');
+
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseDown(scrollElement);
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseUp(scrollElement);
+
+            // This click is normally triggered when releasing the mouse after scrolling
+            await userEvent.click(scrollElement);
+
+            await userEvent.click(screen.getByTestId('1'));
+
+            expect(clickSpy).toHaveBeenCalled();
+        });
     });
 
     describe('sliding', () => {
@@ -179,6 +208,10 @@ describe('Slider', () => {
         });
 
         it('updates controls visibility', () => {
+            Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 500 });
+            Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: 1000 });
+            Object.defineProperty(HTMLElement.prototype, 'scrollLeft', { configurable: true, value: 0, writable: true });
+
             render(<Slider>
                 <span key={1}/>
                 <span key={2}/>
@@ -189,20 +222,16 @@ describe('Slider', () => {
             const slides = screen.getAllByRole('listitem');
             const nextButton = screen.getByLabelText('Next slide');
             const prevButton = screen.getByLabelText('Previous slide');
-            const lessContentFade = screen.getByTestId('less-content');
-            const moreContentFade = screen.getByTestId('more-content');
 
             ([
                 // All slides are visible
-                [[1, 1, 1, 1], true, true, true, true],
-                // No slides are visible
-                [[0, 0, 0, 0], false, false, false, false],
+                [[1, 1, 1, 1], true, true],
                 // Only the first slide is not visible
-                [[0, 1, 1, 1], false, true, false, true],
+                [[0, 1, 1, 1], false, true],
                 // Only the last slide is not visible
-                [[1, 1, 1, 0], true, false, true, false],
-            ] as Array<[number[], boolean, boolean, boolean, boolean]>).forEach((expectations) => {
-                const [intersections, prevButtonHidden, nextButtonHidden, lessContentFadeHidden, moreContentFadeHidden] = expectations;
+                [[1, 1, 1, 0], true, false],
+            ] as Array<[number[], boolean, boolean]>).forEach((expectations) => {
+                const [intersections, prevButtonHidden, nextButtonHidden] = expectations;
 
                 intersectionCallback([
                     { intersectionRatio: intersections[0], target: slides[0] } as unknown as IntersectionObserverEntry,
@@ -213,8 +242,6 @@ describe('Slider', () => {
 
                 expect(prevButton.ariaHidden).toBe(String(prevButtonHidden));
                 expect(nextButton.ariaHidden).toBe(String(nextButtonHidden));
-                expect(lessContentFade.ariaHidden).toBe(String(lessContentFadeHidden));
-                expect(moreContentFade.ariaHidden).toBe(String(moreContentFadeHidden));
             });
         });
     });
