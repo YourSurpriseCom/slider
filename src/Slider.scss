@@ -5,57 +5,63 @@
     top: 0;
     bottom: 0;
     margin: auto 0;
+    height: 48px;
+    width: 48px;
     position: absolute;
-    border: solid 1px #434343;
     display: none;
 
     @media (hover: hover) {
-      display: initial;
+      display: flex;
     }
 
     &--next {
-      right: 0;
+      right: -8px;
+
+      @media screen and (min-width: 768px) {
+        right: 0;
+      }
     }
 
     &--prev {
-      left: 0;
-    }
-  }
+      left: -8px;
 
-  &__scroll_indicator {
-    pointer-events: none;
-    top: 0;
-    position: absolute;
-    width: 40px;
-    height: 100%;
-
-    @media (hover: hover) {
-      display: none;
-    }
-
-    &--next-available {
-      right: 0;
-      background: linear-gradient(to right, rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
-    }
-
-    &--prev-available {
-      left: 0;
-      background: linear-gradient(to left, rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%);
+      @media screen and (min-width: 768px) {
+        left: 0;
+      }
     }
   }
 
   &__wrapper {
+    // Prevent the browser from going back in history when there is no scroll area left
+    overscroll-behavior-x: contain;
+    // Hide the scrollbars
+    -ms-overflow-style: none; // for Internet Explorer, Edge
+    scrollbar-width: none; // for Firefox
+
+    &::-webkit-scrollbar {
+      display: none; // for Chrome, Safari, and Opera
+    }
+
     display: flex;
     flex-direction: row;
     overflow-x: auto;
-    margin: 24px 0;
+    margin: 16px;
     scroll-snap-type: x proximity;
+
+    @media screen and (min-width: 768px) {
+      margin: 8px;
+    }
 
     @media (hover: hover) {
       scroll-snap-type: initial;
     }
 
+    &.is-scrollable {
+      cursor: move;
+    }
+
     &.is-dragging {
+      cursor: grabbing;
       user-select: none;
     }
 
@@ -64,17 +70,17 @@
     }
 
     &__slide {
-      margin-right: 24px;
+      scroll-snap-align: start;
+      margin-right: 8px;
+
+      @media screen and (min-width: 768px) {
+        margin-left: 0;
+        margin-right: 16px;
+      }
 
       &:last-child {
         margin-right: 0;
       }
-
-      @media screen and (min-width: 768px) {
-        margin-left: 0;
-      }
-
-      scroll-snap-align: start;
     }
   }
 }
