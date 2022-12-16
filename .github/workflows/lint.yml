@@ -1,4 +1,4 @@
-name: Merge request pipeline
+name: Lint
 on:
   push:
     branches:
@@ -16,4 +16,3 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm run test
-
