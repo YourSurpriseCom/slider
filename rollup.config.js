@@ -10,11 +10,6 @@ export default {
     input: 'src/index.ts',
     output: [
         {
-            file: packageJson.main,
-            format: 'cjs',
-            sourcemap: true,
-        },
-        {
             file: packageJson.module,
             format: 'esm',
             sourcemap: true,
@@ -25,10 +20,10 @@ export default {
         resolve(),
         commonjs(),
         typescript({
-            tsconfig: './tsconfig.json' }),
+            tsconfig: './tsconfig.json',
+        }),
         postcss({
             extract: 'index.css',
-            minimize: true,
             sourceMap: true,
         }),
     ],
