@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { Slider } from './Slider';
 
 const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scrollLeft = 0) => {
