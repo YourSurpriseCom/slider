@@ -59,7 +59,8 @@
     "slider",
     "scroll",
     "snap",
-    "touch"
+    "touch",
+    "react"
   ],
   "author": "YourSurprise",
   "license": "ISC",
