@@ -17,6 +17,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Bump version
+        run: npm version ${{ github.ref_name }}
       - name: Publish
         run: npm publish
         env:
