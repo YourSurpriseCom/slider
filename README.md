@@ -28,12 +28,12 @@ All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/doc
 
 ### Import the CSS files
 
-`import "@yoursurprisecom/slider/dist/index.css";`
+`import "@yoursurprise/slider/dist/index.css";`
 
 ### Implement the Slider
 
 ```
-import Slider from '@yoursurprisecom/slider';
+import { Slider } from '@yoursurprisecom/slider';
 import '@yoursurprisecom/slider/dist/index.css';
 
 export default function YourComponent() {

@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "sourceRoot": "./src",
-    "outDir": "dist",
+    "declarationDir": "dist",
+    "rootDir": "src",
     "target": "ESNext",
     "jsx": "react-jsx",
     "moduleResolution": "node",
     "module": "ESNext",
+    "strict": true,
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,

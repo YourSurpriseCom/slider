@@ -1,9 +1,14 @@
 {
-  "name": "slider",
-  "version": "0.1.0",
-  "description": "Basic slider using modern Javascript and CSS",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "name": "@yoursurprise/slider",
+  "version": "0.0.7",
+  "description": "Basic React slider using modern Javascript and CSS",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "type": "module",
+  "files": [
+    "src/*",
+    "dist/*"
+  ],
   "peerDependencies": {
     "react": "^18.2.0"
   },
@@ -59,7 +64,8 @@
     "slider",
     "scroll",
     "snap",
-    "touch"
+    "touch",
+    "react"
   ],
   "author": "YourSurprise",
   "license": "ISC",
