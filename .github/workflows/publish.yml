@@ -17,7 +17,7 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Bump version
+      - name: Publish
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
