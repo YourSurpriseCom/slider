@@ -20,11 +20,11 @@ All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/doc
 
 ### npm
 
-`npm install @yoursurprisecom/slider --save`
+`npm install @yoursurprise/slider --save`
 
 ### yarn
 
-`yarn add @yoursurprisecom/slider`
+`yarn add @yoursurprise/slider`
 
 ### Import the CSS files
 
@@ -33,8 +33,8 @@ All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/doc
 ### Implement the Slider
 
 ```
-import { Slider } from '@yoursurprisecom/slider';
-import '@yoursurprisecom/slider/dist/index.css';
+import { Slider } from '@yoursurprise/slider';
+import '@yoursurprise/slider/dist/index.css';
 
 export default function YourComponent() {
     return (
