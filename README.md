@@ -15,6 +15,12 @@ Before using this slider, please consider the following:
 - The slider only contains styling to make it functional
 - There is no configuration of aforementioned features (yet)
 
+Todos:
+- Add a demo page
+- Add more configuration
+- Add end-to-end tests
+- Set up proper workflows in GitHub
+
 All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) are supported.
 
 ## Installation
