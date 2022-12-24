@@ -19,7 +19,7 @@ module.exports = {
                 devDependencies: [
                     '**/*.test.*',
                     '**/rollup.config.js*',
-                    '**/babel.config.js*',
+                    '**/babel.config.cjs*',
                     '**/jest.config.js*',
                     '**/[mM]ock[s?]/**'
                 ]
