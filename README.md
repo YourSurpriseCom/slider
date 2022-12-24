@@ -1,4 +1,4 @@
-# React slider
+# React slider (alpha)
 
 This package contains a basic modern slider. The purpose of this slider is to provide a simple React component
 which can be controlled in a userfriendly way on mobile, tablet and desktop. 
@@ -11,6 +11,7 @@ This slider has the following features:
 - Support for multiple variable width slides
 
 Before using this slider, please consider the following:
+- This project is still being set up, this is an alpha version
 - The slider only contains styling to make it functional
 - There is no configuration of aforementioned features (yet)
 
