@@ -20,6 +20,7 @@ Todos:
 - Add more configuration
 - Add end-to-end tests
 - Set up proper workflows in GitHub
+- Set the GitHub repository to public
 
 All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) are supported.
 

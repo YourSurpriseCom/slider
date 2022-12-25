@@ -10,30 +10,35 @@
     position: absolute;
     display: none;
 
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #C9C9C9;
+    background-color: white;
+    font-size: 18px;
+
     @media (hover: hover) {
       display: flex;
     }
 
-    &--next {
-      right: -8px;
+    &--hidden {
+      display: none;
+    }
 
-      @media screen and (min-width: 768px) {
-        right: 0;
-      }
+    &--next {
+      right: 0;
     }
 
     &--prev {
-      left: -8px;
-
-      @media screen and (min-width: 768px) {
-        left: 0;
-      }
+      left: 0;
     }
   }
 
   &__wrapper {
+
     // Prevent the browser from going back in history when there is no scroll area left
     overscroll-behavior-x: contain;
+
     // Hide the scrollbars
     -ms-overflow-style: none; // for Internet Explorer, Edge
     scrollbar-width: none; // for Firefox
@@ -45,15 +50,17 @@
     display: flex;
     flex-direction: row;
     overflow-x: auto;
-    margin: 16px;
+
     scroll-snap-type: x proximity;
 
-    @media screen and (min-width: 768px) {
-      margin: 8px;
-    }
-
+    // Disable scroll snapping when we assume there's a mouse
     @media (hover: hover) {
       scroll-snap-type: initial;
+    }
+
+    // Enable smooth scroll, but only when not dragging the slider with a mouse
+    &:not(.is-dragging) {
+      scroll-behavior: smooth;
     }
 
     &.is-scrollable {
@@ -63,24 +70,6 @@
     &.is-dragging {
       cursor: grabbing;
       user-select: none;
-    }
-
-    &:not(.is-dragging) {
-      scroll-behavior: smooth;
-    }
-
-    &__slide {
-      scroll-snap-align: start;
-      margin-right: 8px;
-
-      @media screen and (min-width: 768px) {
-        margin-left: 0;
-        margin-right: 16px;
-      }
-
-      &:last-child {
-        margin-right: 0;
-      }
     }
   }
 }

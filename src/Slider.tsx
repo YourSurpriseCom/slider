@@ -131,10 +131,10 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
         const previousContentAvailable = getFirstVisibleSlideIndex() > 0 && isScrollable;
 
         if (arrowNextRef.current && arrowPrevRef.current) {
-            arrowNextRef.current.classList.toggle('hidden', moreContentAvailable === false);
+            arrowNextRef.current.classList.toggle('slider__button--hidden', moreContentAvailable === false);
             arrowNextRef.current.ariaHidden = String(moreContentAvailable === false);
 
-            arrowPrevRef.current.classList.toggle('hidden', previousContentAvailable === false);
+            arrowPrevRef.current.classList.toggle('slider__button--hidden', previousContentAvailable === false);
             arrowPrevRef.current.ariaHidden = String(previousContentAvailable === false);
         }
     }, [isScrollable]);
@@ -235,18 +235,18 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
                 type="button"
                 onClick={() => navigate(NavigationDirection.PREV)}
                 ref={arrowPrevRef}
-                className="slider__button slider__button--prev button button--ghost button--clean button--has-icon hidden"
+                className="slider__button slider__button--prev slider__button--hidden"
             >
-                <i className="icon-chevron-left"/>
+                { '<' }
             </button>
             <button
                 aria-label="Next slide"
                 type="button"
                 onClick={() => navigate(NavigationDirection.NEXT)}
                 ref={arrowNextRef}
-                className="slider__button slider__button--next button button--ghost button--clean button--has-icon hidden"
+                className="slider__button slider__button--next slider__button--hidden"
             >
-                <i className="icon-chevron-right"/>
+                { '>' }
             </button>
         </div>
     );
