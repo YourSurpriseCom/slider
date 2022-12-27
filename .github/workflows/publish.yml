@@ -17,6 +17,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Set version
+        run: npm version ${{ github.ref_name }} --no-git-tag-version
       - name: Publish
         run: npm publish
         env:
