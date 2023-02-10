@@ -17,6 +17,7 @@ module.exports = {
             'error',
             {
                 devDependencies: [
+                    './Index.tsx',
                     '**/*.test.*',
                     '**/rollup.config.js*',
                     '**/babel.config.cjs*',

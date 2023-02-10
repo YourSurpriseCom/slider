@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  max-width: 800px;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+body {
+  background-color: #fcf8f4;
+}
+
+#demo {
+  display: flex;
+  justify-content: center;
+}
+
+h1 {
+  color: rgb(85, 76, 68);
+}
+
+.slider {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(33, 32, 31, 0.05);
+}
+
+.demo-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+
+  &--fixed {
+    width: 200px;
+    height: 200px;
+  }
+}

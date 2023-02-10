@@ -16,18 +16,18 @@ Before using this slider, please consider the following:
 - There is no configuration of aforementioned features (yet)
 
 Todos:
-- Add a demo page
+- ~~Add a demo page~~
 - Add more configuration
 - Add end-to-end tests
-- Set up proper workflows in GitHub
-- Set the GitHub repository to public
+- ~~Set up proper workflows in GitHub~~
+- ~~Set the GitHub repository to public~~
 - Support more browsers
 
 All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) will be supported, as of right now, only the latest versions of browsers are supported.
 
 ## Installation
 
-### npm
+### npm 
 
 `npm install @yoursurprise/slider --save`
 
