@@ -3,6 +3,8 @@
 This package contains a basic modern slider. The purpose of this slider is to provide a simple React component
 which can be controlled in a userfriendly way on mobile, tablet and desktop. 
 
+Demo page: https://yoursurprisecom.github.io/slider/
+
 This slider has the following features: 
 
 - Free scroll on mobile with native CSS scroll snapping
