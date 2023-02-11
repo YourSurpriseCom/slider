@@ -71,5 +71,9 @@
       cursor: grabbing;
       user-select: none;
     }
+
+    &__slide {
+      scroll-snap-align: start;
+    }
   }
 }
