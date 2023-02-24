@@ -249,6 +249,8 @@ describe('UpsellSlider', () => {
                 [[0, 1, 1, 1], false, true],
                 // Only the last slide is not visible
                 [[1, 1, 1, 0], true, false],
+                // Only a single slide is partially visible
+                [[0, 0, 0.5, 0], false, false],
             ] as Array<[number[], boolean, boolean]>;
 
             for (const testCase of testCases) {
