@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Slider } from './Slider';
@@ -89,8 +89,23 @@ describe('UpsellSlider', () => {
             const nextButton = screen.getByLabelText('Next slide');
             const prevButton = screen.getByLabelText('Previous slide');
 
-            expect(prevButton.ariaHidden).toBe('true');
-            expect(nextButton.ariaHidden).toBe('false');
+            expect(prevButton).toHaveAttribute('aria-hidden', 'true');
+            expect(nextButton).toHaveAttribute('aria-hidden', 'true');
+        });
+
+        it('does not render controls if disabled', () => {
+            render(<Slider hideNavigationButtons={true}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+            </Slider>);
+
+            const nextButton = screen.queryByLabelText('Next slide');
+            const prevButton = screen.queryByLabelText('Previous slide');
+
+            expect(prevButton).not.toBeInTheDocument();
+            expect(nextButton).not.toBeInTheDocument();
         });
 
         it('allows scrolling by dragging with the mouse', () => {
@@ -164,12 +179,14 @@ describe('UpsellSlider', () => {
                 Object.defineProperty(child, 'offsetLeft', { value: 100 * (i + 1) });
             });
 
-            intersectionCallback([
-                { intersectionRatio: 1, target: slides[0] } as unknown as IntersectionObserverEntry,
-                { intersectionRatio: 0.5, target: slides[1] } as unknown as IntersectionObserverEntry,
-                { intersectionRatio: 0, target: slides[2] } as unknown as IntersectionObserverEntry,
-                { intersectionRatio: 0, target: slides[3] } as unknown as IntersectionObserverEntry,
-            ]);
+            await act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[ 0 ] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0.5, target: slides[ 1 ] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[ 2 ] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[ 3 ] } as unknown as IntersectionObserverEntry,
+                ]);
+            });
 
             await userEvent.click(nextButton);
 
@@ -191,12 +208,14 @@ describe('UpsellSlider', () => {
                 Object.defineProperty(child, 'offsetLeft', { value: 100 * (i + 1) });
             });
 
-            intersectionCallback([
-                { intersectionRatio: 0, target: slides[0] } as unknown as IntersectionObserverEntry,
-                { intersectionRatio: 0, target: slides[1] } as unknown as IntersectionObserverEntry,
-                { intersectionRatio: 1, target: slides[2] } as unknown as IntersectionObserverEntry,
-                { intersectionRatio: 0.5, target: slides[3] } as unknown as IntersectionObserverEntry,
-            ]);
+            await act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 0, target: slides[ 0 ] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[ 1 ] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 1, target: slides[ 2 ] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0.5, target: slides[ 3 ] } as unknown as IntersectionObserverEntry,
+                ]);
+            });
 
             await userEvent.click(prevButton);
 
@@ -207,7 +226,7 @@ describe('UpsellSlider', () => {
             });
         });
 
-        it('updates controls visibility', () => {
+        it('updates controls visibility', async () => {
             Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 500 });
             Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: 1000 });
             Object.defineProperty(HTMLElement.prototype, 'scrollLeft', { configurable: true, value: 0, writable: true });
@@ -223,26 +242,31 @@ describe('UpsellSlider', () => {
             const nextButton = screen.getByLabelText('Next slide');
             const prevButton = screen.getByLabelText('Previous slide');
 
-            ([
+            const testCases = [
                 // All slides are visible
                 [[1, 1, 1, 1], true, true],
                 // Only the first slide is not visible
                 [[0, 1, 1, 1], false, true],
                 // Only the last slide is not visible
                 [[1, 1, 1, 0], true, false],
-            ] as Array<[number[], boolean, boolean]>).forEach((expectations) => {
-                const [intersections, prevButtonHidden, nextButtonHidden] = expectations;
+            ] as Array<[number[], boolean, boolean]>;
 
-                intersectionCallback([
-                    { intersectionRatio: intersections[0], target: slides[0] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: intersections[1], target: slides[1] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: intersections[2], target: slides[2] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: intersections[3], target: slides[3] } as unknown as IntersectionObserverEntry,
-                ]);
+            for (const testCase of testCases) {
+                const [intersections, prevButtonHidden, nextButtonHidden] = testCase;
 
-                expect(prevButton.ariaHidden).toBe(String(prevButtonHidden));
-                expect(nextButton.ariaHidden).toBe(String(nextButtonHidden));
-            });
+                // eslint-disable-next-line @typescript-eslint/no-loop-func
+                await act(() => {
+                    intersectionCallback([
+                        { intersectionRatio: intersections[0], target: slides[0] } as unknown as IntersectionObserverEntry,
+                        { intersectionRatio: intersections[1], target: slides[1] } as unknown as IntersectionObserverEntry,
+                        { intersectionRatio: intersections[2], target: slides[2] } as unknown as IntersectionObserverEntry,
+                        { intersectionRatio: intersections[3], target: slides[3] } as unknown as IntersectionObserverEntry,
+                    ]);
+                });
+
+                expect(prevButton).toHaveAttribute('aria-hidden', String(prevButtonHidden));
+                expect(nextButton).toHaveAttribute('aria-hidden', String(nextButtonHidden));
+            }
         });
     });
 });

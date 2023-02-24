@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import type React from 'react';
 import type { MouseEvent as ReactMouseEvent, PropsWithChildren } from 'react';
 import { useRef, useEffect, Children, useCallback, useState } from 'react';
@@ -19,11 +20,19 @@ interface SlideVisibilityEntry {
     visibility: Visbility;
 }
 
-export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
+interface Settings {
+    // Sets whether the navigation buttons (next/prev) are no longer rendered
+    hideNavigationButtons?: boolean;
+}
+
+export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNavigationButtons = false }) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement>(null);
     const visibleSlideIndices = useRef<number[]>([]);
     const partiallyVisibleSlideIndices = useRef<number[]>([]);
+
+    const [nextArrowVisible, setNextArrowVisible] = useState<boolean>(false);
+    const [prevArrowVisible, setPrevArrowVisible] = useState<boolean>(false);
 
     const [isScrollable, setIsScrollable] = useState<boolean>(false);
     const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -43,7 +52,7 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
             return () => {};
         }
 
-        const checkScrollable = () => setIsScrollable(currentWrapper.classList.toggle('is-scrollable', currentWrapper.scrollWidth > currentWrapper.clientWidth));
+        const checkScrollable = () => setIsScrollable(currentWrapper.scrollWidth > currentWrapper.clientWidth);
 
         window?.addEventListener('resize', checkScrollable);
 
@@ -55,12 +64,6 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
     }, [wrapper]);
 
     useEffect(() => {
-        wrapper.current?.classList.toggle('is-scrollable', isScrollable);
-    }, [isScrollable]);
-
-    useEffect(() => {
-        wrapper.current?.classList.toggle('is-dragging', isDragging);
-
         const onDocumentMouseUp = (event: MouseEvent) => {
             event.stopPropagation();
             event.preventDefault();
@@ -126,18 +129,15 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
         ?? partiallyVisibleSlideIndices.current[partiallyVisibleSlideIndices.current.length - 1] ?? -1;
 
     const setControlsVisibility = useCallback(() => {
-        const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
-        const moreContentAvailable = isScrollable && lastSlideFullyVisible === false;
-        const previousContentAvailable = getFirstVisibleSlideIndex() > 0 && isScrollable;
-
-        if (arrowNextRef.current && arrowPrevRef.current) {
-            arrowNextRef.current.classList.toggle('slider__button--hidden', moreContentAvailable === false);
-            arrowNextRef.current.ariaHidden = String(moreContentAvailable === false);
-
-            arrowPrevRef.current.classList.toggle('slider__button--hidden', previousContentAvailable === false);
-            arrowPrevRef.current.ariaHidden = String(previousContentAvailable === false);
+        if (hideNavigationButtons) {
+            return;
         }
-    }, [isScrollable]);
+
+        const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
+
+        setPrevArrowVisible(getFirstVisibleSlideIndex() > 0 && isScrollable);
+        setNextArrowVisible(isScrollable && lastSlideFullyVisible === false);
+    }, [isScrollable, hideNavigationButtons]);
 
     const getVisibilityByIntersectionRatio = (intersectionRatio: number) => {
         if (intersectionRatio >= 0.9) {
@@ -155,8 +155,6 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
         if (!wrapper.current) {
             return () => {};
         }
-
-        setControlsVisibility();
 
         const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
             entries.forEach((entry: IntersectionObserverEntry) => {
@@ -218,11 +216,15 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
 
     return (
         <div className="slider">
-            <div className="slider__wrapper" role="list" ref={wrapper}
+            <div role="list" ref={wrapper}
                 onMouseDown={mouseDownHandler}
                 onMouseMove={mouseMoveHandler}
                 onMouseUp={mouseUpHandler}
                 onClickCapture={blockChildClickHandler}
+                className={classNames('slider__wrapper', {
+                    'is-scrollable': isScrollable,
+                    'is-dragging': isDragging,
+                })}
             >
                 {Children.map(children, (child, index: number) => (
                     <div className="slider__wrapper__slide" role="listitem" key={index} data-slide-index={index} ref={(node) => { if (node) { addSlide(node, index); } }}>
@@ -230,32 +232,46 @@ export const Slider: React.FC<PropsWithChildren> = ({ children }) => {
                     </div>
                 ))}
             </div>
-            <button
-                aria-label="Previous slide"
-                type="button"
-                onClick={() => navigate(NavigationDirection.PREV)}
-                ref={arrowPrevRef}
-                className="slider__button slider__button--prev slider__button--hidden"
-            >
-                <svg fill="#33333" viewBox="0 0 256 256" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                    <g>
-                        <path d="M160,220a11.96287,11.96287,0,0,1-8.48535-3.51465l-80-80a12.00062,12.00062,0,0,1,0-16.9707l80-80a12.0001,12.0001,0,0,1,16.9707,16.9707L96.9707,128l71.51465,71.51465A12,12,0,0,1,160,220Z"></path>
-                    </g>
-                </svg>
-            </button>
-            <button
-                aria-label="Next slide"
-                type="button"
-                onClick={() => navigate(NavigationDirection.NEXT)}
-                ref={arrowNextRef}
-                className="slider__button slider__button--next slider__button--hidden"
-            >
-                <svg fill="#333333" viewBox="0 0 256 256" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                    <g>
-                        <path d="M96,220a12,12,0,0,1-8.48535-20.48535L159.0293,128,87.51465,56.48535a12.0001,12.0001,0,0,1,16.9707-16.9707l80,80a12.00062,12.00062,0,0,1,0,16.9707l-80,80A11.96287,11.96287,0,0,1,96,220Z"></path>
-                    </g>
-                </svg>
-            </button>
+            { hideNavigationButtons === false && (
+                <button
+                    aria-label="Previous slide"
+                    type="button"
+                    onClick={() => navigate(NavigationDirection.PREV)}
+                    ref={arrowPrevRef}
+                    aria-hidden={prevArrowVisible === false}
+                    className={classNames([
+                        'slider__button',
+                        'slider__button--prev',
+                        { 'slider__button--hidden': prevArrowVisible === false },
+                    ])}
+                >
+                    <svg fill="#33333" viewBox="0 0 256 256" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                            <path d="M160,220a11.96287,11.96287,0,0,1-8.48535-3.51465l-80-80a12.00062,12.00062,0,0,1,0-16.9707l80-80a12.0001,12.0001,0,0,1,16.9707,16.9707L96.9707,128l71.51465,71.51465A12,12,0,0,1,160,220Z"></path>
+                        </g>
+                    </svg>
+                </button>
+            )}
+            { hideNavigationButtons === false && (
+                <button
+                    aria-label="Next slide"
+                    type="button"
+                    onClick={() => navigate(NavigationDirection.NEXT)}
+                    ref={arrowNextRef}
+                    aria-hidden={nextArrowVisible === false}
+                    className={classNames([
+                        'slider__button',
+                        'slider__button--next',
+                        { 'slider__button--hidden': nextArrowVisible === false },
+                    ])}
+                >
+                    <svg fill="#333333" viewBox="0 0 256 256" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                            <path d="M96,220a12,12,0,0,1-8.48535-20.48535L159.0293,128,87.51465,56.48535a12.0001,12.0001,0,0,1,16.9707-16.9707l80,80a12.00062,12.00062,0,0,1,0,16.9707l-80,80A11.96287,11.96287,0,0,1,96,220Z"></path>
+                        </g>
+                    </svg>
+                </button>
+            )}
         </div>
     );
 };
