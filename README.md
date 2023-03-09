@@ -39,7 +39,9 @@ All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/doc
 
 ### Import the CSS files
 
-`import "@yoursurprise/slider/dist/index.css";`
+```javascript
+import "@yoursurprise/slider/dist/index.css";
+```
 
 ### Implement the Slider
 
