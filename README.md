@@ -15,7 +15,7 @@ This slider has the following features:
 Before using this slider, please consider the following:
 - This project is still being set up, this is an alpha version
 - The slider only contains styling to make it functional
-- There is no configuration of aforementioned features (yet)
+- There is no configuration of most aforementioned features (yet)
 
 Todos:
 - ~~Add a demo page~~
@@ -43,7 +43,7 @@ All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/doc
 
 ### Implement the Slider
 
-```
+```javascript
 import { Slider } from '@yoursurprise/slider';
 import '@yoursurprise/slider/dist/index.css';
 
@@ -59,6 +59,8 @@ export default function YourComponent() {
 }
 ```
 
+### Configuration
 
-
-
+| Option                | Required | Default | Description                         |   
+|-----------------------|----------|---------|-------------------------------------|
+| hideNavigationButtons | `false`  | `false` | Always hides the navigation buttons |
