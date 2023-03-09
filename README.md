@@ -61,6 +61,6 @@ export default function YourComponent() {
 
 ### Configuration
 
-| Option                | Required | Default | Description                         |   
-|-----------------------|----------|---------|-------------------------------------|
-| hideNavigationButtons | `false`  | `false` | Always hides the navigation buttons |
+| Option                | Type      | Required | Default | Description                         |   
+|-----------------------|-----------|----------|---------|-------------------------------------|
+| hideNavigationButtons | `boolean` | `false`  | `false` | Always hides the navigation buttons |
