@@ -2,6 +2,8 @@ import classNames from 'classnames';
 import type React from 'react';
 import type { MouseEvent as ReactMouseEvent, PropsWithChildren } from 'react';
 import { useRef, useEffect, Children, useCallback, useState } from 'react';
+import { NextButton } from './Components/Controls/NextButton';
+import { PreviousButton } from './Components/Controls/PreviousButton';
 import './Slider.scss';
 
 enum Visbility {
@@ -41,9 +43,6 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         clientX: 0,
         scrollX: 0,
     });
-
-    const arrowPrevRef = useRef<HTMLButtonElement>(null);
-    const arrowNextRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         const currentWrapper = wrapper.current;
@@ -90,9 +89,7 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         setIsBlockingClicks(false);
     };
 
-    const mouseUpHandler = () => {
-        setIsDragging(false);
-    };
+    const mouseUpHandler = () => setIsDragging(false);
 
     const mouseDownHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
         setMousePosition({
@@ -231,40 +228,10 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
                 ))}
             </div>
             { hideNavigationButtons === false && (
-                <button
-                    aria-label="Previous slide"
-                    type="button"
-                    onClick={() => navigate(NavigationDirection.PREV)}
-                    ref={arrowPrevRef}
-                    aria-hidden={prevArrowVisible === false}
-                    className={classNames([
-                        'slider__button',
-                        'slider__button--prev',
-                        { 'slider__button--hidden': prevArrowVisible === false },
-                    ])}
-                >
-                    <svg fill="#554c44" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 256 256">
-                        <path d="M160,216a8.5,8.5,0,0,1-5.7-2.3l-80-80a8.1,8.1,0,0,1,0-11.4l80-80a8.1,8.1,0,0,1,11.4,11.4L91.3,128l74.4,74.3a8.1,8.1,0,0,1,0,11.4A8.5,8.5,0,0,1,160,216Z"/>
-                    </svg>
-                </button>
-            )}
-            { hideNavigationButtons === false && (
-                <button
-                    aria-label="Next slide"
-                    type="button"
-                    onClick={() => navigate(NavigationDirection.NEXT)}
-                    ref={arrowNextRef}
-                    aria-hidden={nextArrowVisible === false}
-                    className={classNames([
-                        'slider__button',
-                        'slider__button--next',
-                        { 'slider__button--hidden': nextArrowVisible === false },
-                    ])}
-                >
-                    <svg fill="#554c44" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 256 256">
-                        <path d="M96,216a8.5,8.5,0,0,1-5.7-2.3,8.1,8.1,0,0,1,0-11.4L164.7,128,90.3,53.7a8.1,8.1,0,0,1,11.4-11.4l80,80a8.1,8.1,0,0,1,0,11.4l-80,80A8.5,8.5,0,0,1,96,216Z"/>
-                    </svg>
-                </button>
+                <>
+                    <PreviousButton onClick={() => navigate(NavigationDirection.PREV)} isHidden={prevArrowVisible === false}/>
+                    <NextButton onClick={() => navigate(NavigationDirection.NEXT)} isHidden={nextArrowVisible === false}/>
+                </>
             )}
         </div>
     );
