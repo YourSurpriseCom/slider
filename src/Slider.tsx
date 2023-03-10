@@ -243,10 +243,8 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
                         { 'slider__button--hidden': prevArrowVisible === false },
                     ])}
                 >
-                    <svg fill="#33333" viewBox="0 0 256 256" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                        <g>
-                            <path d="M160,220a11.96287,11.96287,0,0,1-8.48535-3.51465l-80-80a12.00062,12.00062,0,0,1,0-16.9707l80-80a12.0001,12.0001,0,0,1,16.9707,16.9707L96.9707,128l71.51465,71.51465A12,12,0,0,1,160,220Z"></path>
-                        </g>
+                    <svg fill="#554c44" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 256 256">
+                        <path d="M160,216a8.5,8.5,0,0,1-5.7-2.3l-80-80a8.1,8.1,0,0,1,0-11.4l80-80a8.1,8.1,0,0,1,11.4,11.4L91.3,128l74.4,74.3a8.1,8.1,0,0,1,0,11.4A8.5,8.5,0,0,1,160,216Z"/>
                     </svg>
                 </button>
             )}
@@ -263,10 +261,8 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
                         { 'slider__button--hidden': nextArrowVisible === false },
                     ])}
                 >
-                    <svg fill="#333333" viewBox="0 0 256 256" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                        <g>
-                            <path d="M96,220a12,12,0,0,1-8.48535-20.48535L159.0293,128,87.51465,56.48535a12.0001,12.0001,0,0,1,16.9707-16.9707l80,80a12.00062,12.00062,0,0,1,0,16.9707l-80,80A11.96287,11.96287,0,0,1,96,220Z"></path>
-                        </g>
+                    <svg fill="#554c44" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 256 256">
+                        <path d="M96,216a8.5,8.5,0,0,1-5.7-2.3,8.1,8.1,0,0,1,0-11.4L164.7,128,90.3,53.7a8.1,8.1,0,0,1,11.4-11.4l80,80a8.1,8.1,0,0,1,0,11.4l-80,80A8.5,8.5,0,0,1,96,216Z"/>
                     </svg>
                 </button>
             )}
