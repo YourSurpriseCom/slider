@@ -4,6 +4,7 @@ import type { MouseEvent as ReactMouseEvent, PropsWithChildren } from 'react';
 import { useRef, useEffect, Children, useCallback, useState } from 'react';
 import { NextButton } from './Components/Controls/NextButton';
 import { PreviousButton } from './Components/Controls/PreviousButton';
+import { useSliderIndex } from './Hooks/UseSliderIndex';
 import './Slider.scss';
 
 enum Visbility {
@@ -30,8 +31,16 @@ interface Settings {
 export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNavigationButtons = false }) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement>(null);
-    const visibleSlideIndices = useRef<number[]>([]);
-    const partiallyVisibleSlideIndices = useRef<number[]>([]);
+
+    const {
+        addVisibleSlide,
+        addPartiallyVisibleSlide,
+        getLastVisibleSlideIndex,
+        sortSlides,
+        getFirstVisibleSlideIndex,
+        removeVisibleSlide,
+        removePartiallyVisibleSlide,
+    } = useSliderIndex();
 
     const [nextArrowVisible, setNextArrowVisible] = useState<boolean>(false);
     const [prevArrowVisible, setPrevArrowVisible] = useState<boolean>(false);
@@ -120,17 +129,12 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         };
     };
 
-    const getFirstVisibleSlideIndex = (): number => visibleSlideIndices.current[0] ?? partiallyVisibleSlideIndices.current[0] ?? -1;
-
-    const getLastVisibleSlideIndex = (): number => visibleSlideIndices.current[visibleSlideIndices.current.length - 1]
-        ?? partiallyVisibleSlideIndices.current[partiallyVisibleSlideIndices.current.length - 1] ?? -1;
-
     const setControlsVisibility = useCallback(() => {
         const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
 
         setPrevArrowVisible(getFirstVisibleSlideIndex() > 0 && isScrollable);
         setNextArrowVisible(isScrollable && lastSlideFullyVisible === false);
-    }, [isScrollable]);
+    }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
 
     const getVisibilityByIntersectionRatio = (intersectionRatio: number) => {
         if (intersectionRatio >= 0.9) {
@@ -153,23 +157,13 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
             entries.forEach((entry: IntersectionObserverEntry) => {
                 const target = entry.target as HTMLDivElement;
                 const index = Number(target.dataset.slideIndex);
+                const visibility = getVisibilityByIntersectionRatio(entry.intersectionRatio);
 
-                if (getVisibilityByIntersectionRatio(entry.intersectionRatio) === Visbility.FULL) {
-                    visibleSlideIndices.current.push(index);
-                } else {
-                    visibleSlideIndices.current = visibleSlideIndices.current.filter((slideIndex) => slideIndex !== index);
-                }
-
-                if (getVisibilityByIntersectionRatio(entry.intersectionRatio) === Visbility.PARTIAL) {
-                    partiallyVisibleSlideIndices.current.push(index);
-                } else {
-                    partiallyVisibleSlideIndices.current = partiallyVisibleSlideIndices.current.filter((slideIndex) => slideIndex !== index);
-                }
+                visibility === Visbility.FULL ? addVisibleSlide(index) : removeVisibleSlide(index);
+                visibility === Visbility.PARTIAL ? addPartiallyVisibleSlide(index) : removePartiallyVisibleSlide(index);
             });
 
-            // Make sure there are no duplicate visible slides, then sort to retain proper order
-            visibleSlideIndices.current = [...new Set(visibleSlideIndices.current)].sort((a, b) => a - b);
-            partiallyVisibleSlideIndices.current = [...new Set(partiallyVisibleSlideIndices.current)].sort((a, b) => a - b);
+            sortSlides();
 
             if (hideNavigationButtons === false) {
                 setControlsVisibility();
@@ -184,7 +178,7 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         slides.current.forEach(({ element }) => intersectionObserver.observe(element));
 
         return () => intersectionObserver.disconnect();
-    }, [wrapper, setControlsVisibility, hideNavigationButtons]);
+    }, [wrapper, setControlsVisibility, hideNavigationButtons, sortSlides, addVisibleSlide, removeVisibleSlide, addPartiallyVisibleSlide, removePartiallyVisibleSlide]);
 
     const navigate = (direction: NavigationDirection) => {
         if (!wrapper.current) {
