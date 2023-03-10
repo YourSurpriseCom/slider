@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Slider } from './src/index';
 import { createRoot } from 'react-dom/client';
 import './Index.scss';
 
 const Index: React.FC = () => {
+    const [hideNavigationButtons, setHideNavigationButtons] = useState<boolean>(false);
+
     return (
         <div className="container">
+            <h1>Configuration</h1>
+            <button onClick={() => setHideNavigationButtons(!hideNavigationButtons)}>Toggle controls</button>
             <h1>Slides with fixed width</h1>
-            <Slider>
+            <Slider hideNavigationButtons={hideNavigationButtons}>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(50, 50, 50)' }}>Slide 1</div>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(75, 75, 75)' }}>Slide 2</div>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(100, 100, 100)' }}>Slide 3</div>
@@ -18,7 +22,7 @@ const Index: React.FC = () => {
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(225, 225, 225)' }}>Slide 8</div>
             </Slider>
             <h1>Slides with fixed varying width</h1>
-            <Slider>
+            <Slider hideNavigationButtons={hideNavigationButtons}>
                 <div className="demo-slide" style={{ width: '100px', height: '200px', backgroundColor: 'rgb(50, 50, 50)' }}>Slide 1</div>
                 <div className="demo-slide" style={{ width: '200px', height: '200px', backgroundColor: 'rgb(75, 75, 75)' }}>Slide 2</div>
                 <div className="demo-slide" style={{ width: '300px', height: '200px', backgroundColor: 'rgb(100, 100, 100)' }}>Slide 3</div>
@@ -29,7 +33,7 @@ const Index: React.FC = () => {
                 <div className="demo-slide" style={{ width: '75px', height: '200px', backgroundColor: 'rgb(225, 225, 225)' }}>Slide 8</div>
             </Slider>
             <h1>Slides with (lazy loaded) images</h1>
-            <Slider>
+            <Slider hideNavigationButtons={hideNavigationButtons}>
                 <img draggable={false} loading="lazy" className="demo-slide" width="100" height="200" alt="Slide 1" src="https://via.placeholder.com/100x200/333333"/>
                 <img draggable={false} loading="lazy" className="demo-slide" width="200" height="200" alt="Slide 2" src="https://via.placeholder.com/200x200/333333"/>
                 <img draggable={false} loading="lazy" className="demo-slide" width="300" height="200" alt="Slide 3" src="https://via.placeholder.com/300x200/333333"/>
