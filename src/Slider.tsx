@@ -4,23 +4,12 @@ import type { MouseEvent as ReactMouseEvent, PropsWithChildren } from 'react';
 import { useRef, useEffect, Children, useCallback, useState } from 'react';
 import { NextButton } from './Components/Controls/NextButton';
 import { PreviousButton } from './Components/Controls/PreviousButton';
-import { useSliderIndex } from './Hooks/UseSliderIndex';
+import { NavigationDirection, useSlider, Visibility } from './Hooks/UseSlider';
 import './Slider.scss';
-
-enum Visbility {
-    FULL,
-    PARTIAL,
-    NONE,
-}
-
-enum NavigationDirection {
-    PREV,
-    NEXT,
-}
 
 interface SlideVisibilityEntry {
     element: HTMLDivElement;
-    visibility: Visbility;
+    visibility: Visibility;
 }
 
 interface Settings {
@@ -32,16 +21,6 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement>(null);
 
-    const {
-        addVisibleSlide,
-        addPartiallyVisibleSlide,
-        getLastVisibleSlideIndex,
-        sortSlides,
-        getFirstVisibleSlideIndex,
-        removeVisibleSlide,
-        removePartiallyVisibleSlide,
-    } = useSliderIndex();
-
     const [nextArrowVisible, setNextArrowVisible] = useState<boolean>(false);
     const [prevArrowVisible, setPrevArrowVisible] = useState<boolean>(false);
 
@@ -52,6 +31,18 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         clientX: 0,
         scrollX: 0,
     });
+
+    const {
+        getLeftPositionToScrollTo,
+        getVisibilityByIntersectionRatio,
+        addVisibleSlide,
+        addPartiallyVisibleSlide,
+        getLastVisibleSlideIndex,
+        sortSlides,
+        getFirstVisibleSlideIndex,
+        removeVisibleSlide,
+        removePartiallyVisibleSlide,
+    } = useSlider();
 
     useEffect(() => {
         const currentWrapper = wrapper.current;
@@ -125,7 +116,7 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
     const addSlide = (node: HTMLDivElement, index: number) => {
         slides.current[index] = {
             element: node,
-            visibility: Visbility.NONE,
+            visibility: Visibility.NONE,
         };
     };
 
@@ -135,18 +126,6 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         setPrevArrowVisible(getFirstVisibleSlideIndex() > 0 && isScrollable);
         setNextArrowVisible(isScrollable && lastSlideFullyVisible === false);
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
-
-    const getVisibilityByIntersectionRatio = (intersectionRatio: number) => {
-        if (intersectionRatio >= 0.9) {
-            return Visbility.FULL;
-        }
-
-        if (intersectionRatio >= 0.5) {
-            return Visbility.PARTIAL;
-        }
-
-        return Visbility.NONE;
-    };
 
     useEffect(() => {
         if (!wrapper.current) {
@@ -159,8 +138,8 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
                 const index = Number(target.dataset.slideIndex);
                 const visibility = getVisibilityByIntersectionRatio(entry.intersectionRatio);
 
-                visibility === Visbility.FULL ? addVisibleSlide(index) : removeVisibleSlide(index);
-                visibility === Visbility.PARTIAL ? addPartiallyVisibleSlide(index) : removePartiallyVisibleSlide(index);
+                visibility === Visibility.FULL ? addVisibleSlide(index) : removeVisibleSlide(index);
+                visibility === Visibility.PARTIAL ? addPartiallyVisibleSlide(index) : removePartiallyVisibleSlide(index);
             });
 
             sortSlides();
@@ -178,7 +157,17 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         slides.current.forEach(({ element }) => intersectionObserver.observe(element));
 
         return () => intersectionObserver.disconnect();
-    }, [wrapper, setControlsVisibility, hideNavigationButtons, sortSlides, addVisibleSlide, removeVisibleSlide, addPartiallyVisibleSlide, removePartiallyVisibleSlide]);
+    }, [
+        wrapper,
+        setControlsVisibility,
+        hideNavigationButtons,
+        sortSlides,
+        addVisibleSlide,
+        removeVisibleSlide,
+        addPartiallyVisibleSlide,
+        removePartiallyVisibleSlide,
+        getVisibilityByIntersectionRatio,
+    ]);
 
     const navigate = (direction: NavigationDirection) => {
         if (!wrapper.current) {
@@ -186,19 +175,19 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         }
 
         const targetSlideIndex = direction === NavigationDirection.PREV ? getFirstVisibleSlideIndex() - 1 : getLastVisibleSlideIndex() + 1;
-
         const targetSlide = slides.current[targetSlideIndex];
-        let scrollLeft = 0;
 
         if (!targetSlide) {
             return;
         }
 
-        if (direction === NavigationDirection.PREV) {
-            scrollLeft = targetSlide.element.offsetLeft - wrapper.current.offsetLeft - wrapper.current.clientWidth + targetSlide.element.clientWidth;
-        } else {
-            scrollLeft = targetSlide.element.offsetLeft - wrapper.current.offsetLeft;
-        }
+        const scrollLeft = getLeftPositionToScrollTo(
+            direction,
+            targetSlide.element.offsetLeft,
+            wrapper.current.offsetLeft,
+            wrapper.current.clientWidth,
+            targetSlide.element.clientWidth,
+        );
 
         wrapper.current.scrollTo({ behavior: 'smooth', left: scrollLeft, top: 0 });
     };
