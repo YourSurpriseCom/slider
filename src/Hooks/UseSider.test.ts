@@ -1,5 +1,5 @@
 import { NavigationDirection, useSlider, Visibility } from './UseSlider';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 describe('UseSlider', () => {
     describe('keeps track of slides', () => {
