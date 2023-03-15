@@ -16,6 +16,10 @@
   box-shadow: inset 0 0 0 1px rgba(32, 32, 32, .1);
   transition: box-shadow .2s ease-in-out;
 
+  &__icon {
+    fill: #554c44;
+  }
+
   &:hover {
     box-shadow: inset 0 0 0 1px rgba(32, 32, 32, .2);
   }
