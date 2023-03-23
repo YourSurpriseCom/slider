@@ -11,8 +11,9 @@ module.exports = {
         'react/jsx-props-no-spreading': ['error', { custom: 'ignore' }],
         'react/prop-types': 'off',
         'react/require-default-props': 'off',
-        'indent': ['error', 4, {SwitchCase: 1}],
+        'indent': ['error', 4, { SwitchCase: 1 }],
         '@typescript-eslint/indent': ['error', 4],
+        '@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true }],
         'import/no-extraneous-dependencies': [
             'error',
             {

@@ -1,0 +1,42 @@
+.slider__button {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  height: 48px;
+  width: 48px;
+  margin: auto 0;
+  border-radius: 50%;
+  background-color: white;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  display: none;
+  border: none;
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(32, 32, 32, .1);
+  transition: box-shadow .2s ease-in-out;
+
+  &__icon {
+    fill: #554c44;
+  }
+
+  &:hover {
+    box-shadow: inset 0 0 0 1px rgba(32, 32, 32, .2);
+  }
+
+  @media (hover: hover) {
+    display: flex;
+  }
+
+  &--hidden {
+    display: none;
+  }
+
+  &--next {
+    right: 5px;
+  }
+
+  &--prev {
+    left: 5px;
+  }
+}
