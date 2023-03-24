@@ -1,6 +1,6 @@
 {
   "name": "@yoursurprise/slider",
-  "version": "0.0.11",
+  "version": "1.0.0",
   "description": "Basic React slider using modern Javascript and CSS",
   "module": "dist/index.js",
   "main": "dist/index.js",

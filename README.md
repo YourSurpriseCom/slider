@@ -1,4 +1,4 @@
-# React slider (alpha)
+# React slider
 
 This package contains a basic modern slider. The purpose of this slider is to provide a simple React component
 which can be controlled in a userfriendly way on mobile, tablet and desktop. 
@@ -12,18 +12,15 @@ This slider has the following features:
 - Buttons to navigate on devices with a mouse
 - Support for multiple variable width slides
 
-Before using this slider, please consider the following:
-- This project is still being set up, this is an alpha version
-- The slider only contains styling to make it functional
-- There is no configuration of most aforementioned features (yet)
-
-Todos:
+Todos (help appreciated):
 - ~~Add a demo page~~
 - Add more configuration
 - Add end-to-end tests
 - ~~Set up proper workflows in GitHub~~
 - ~~Set the GitHub repository to public~~
 - Support more browsers
+- Improve accessibility
+- Reduce amount of required tooling
 
 All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) will be supported, as of right now, only the latest versions of browsers are supported.
 
