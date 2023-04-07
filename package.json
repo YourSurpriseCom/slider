@@ -2,13 +2,12 @@
   "name": "@yoursurprise/slider",
   "version": "1.0.0",
   "description": "Basic React slider using modern Javascript and CSS",
-  "module": "dist/index.js",
+  "module": "dist/module.js",
   "main": "dist/index.js",
   "targets": {
     "main": false,
     "module": false
   },
-  "type": "module",
   "files": [
     "src/*",
     "dist/*"
