@@ -17,12 +17,12 @@ export interface SliderSettings {
 }
 
 interface API {
-    scrollTo: (index: number) => void;
+    scrollTo: (index: number, smooth: boolean) => void;
 }
 
 export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ children, hideNavigationButtons = false }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
-    const wrapper = useRef<HTMLDivElement>(null);
+    const wrapper = useRef<HTMLDivElement | null>(null);
 
     const [nextArrowVisible, setNextArrowVisible] = useState<boolean>(false);
     const [prevArrowVisible, setPrevArrowVisible] = useState<boolean>(false);
@@ -34,10 +34,6 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
         clientX: 0,
         scrollX: 0,
     });
-
-    useImperativeHandle(ref, () => ({
-        scrollTo: scrollTo,
-    }));
 
     const {
         getLeftPositionToScrollTo,
@@ -224,6 +220,10 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
 
         wrapper.current.scrollTo({ behavior: 'smooth', left: scrollLeft, top: 0 });
     };
+
+    useImperativeHandle(ref, () => ({
+        scrollTo: scrollTo,
+    }));
 
     return (
         <div className="slider">
