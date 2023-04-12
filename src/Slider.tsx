@@ -1,7 +1,6 @@
 import classNames from 'classnames';
-import type React from 'react';
-import type { MouseEvent as ReactMouseEvent, PropsWithChildren } from 'react';
-import { useRef, useEffect, Children, useCallback, useState } from 'react';
+import type React, { MouseEvent as ReactMouseEvent, PropsWithChildren } from 'react';
+import { Children, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { NextButton } from './Components/Controls/NextButton';
 import { PreviousButton } from './Components/Controls/PreviousButton';
 import { NavigationDirection, useSlider, Visibility } from './Hooks/UseSlider';
@@ -12,12 +11,16 @@ interface SlideVisibilityEntry {
     visibility: Visibility;
 }
 
-interface Settings {
+export interface SliderSettings {
     // Sets whether the navigation buttons (next/prev) are no longer rendered
     hideNavigationButtons?: boolean;
 }
 
-export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNavigationButtons = false }) => {
+interface API {
+    scrollTo: (index: number) => void;
+}
+
+export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ children, hideNavigationButtons = false }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement>(null);
 
@@ -31,6 +34,10 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         clientX: 0,
         scrollX: 0,
     });
+
+    useImperativeHandle(ref, () => ({
+        scrollTo: scrollTo,
+    }));
 
     const {
         getLeftPositionToScrollTo,
@@ -169,6 +176,32 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
         getVisibilityByIntersectionRatio,
     ]);
 
+    const scrollTo = (index: number, smooth: boolean) => {
+        const targetSlide = slides.current[index];
+
+        if (!targetSlide || !wrapper.current) {
+            return;
+        }
+
+        let direction = NavigationDirection.NEXT;
+
+        if (getFirstVisibleSlideIndex() > index) {
+            direction = NavigationDirection.PREV;
+        }
+
+
+        const scrollLeft = getLeftPositionToScrollTo(
+            direction,
+            targetSlide.element.offsetLeft,
+            wrapper.current.offsetLeft,
+            wrapper.current.clientWidth,
+            targetSlide.element.clientWidth,
+        );
+
+        wrapper.current.scrollTo({ behavior: smooth ? 'smooth' : 'instant', left: scrollLeft, top: 0 });
+
+    };
+
     const navigate = (direction: NavigationDirection) => {
         if (!wrapper.current) {
             return;
@@ -218,4 +251,4 @@ export const Slider: React.FC<PropsWithChildren<Settings>> = ({ children, hideNa
             )}
         </div>
     );
-};
+});

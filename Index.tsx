@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Slider } from './src/index';
 import { createRoot } from 'react-dom/client';
 import './Index.scss';
 
 const Index: React.FC = () => {
     const [hideNavigationButtons, setHideNavigationButtons] = useState<boolean>(false);
+    const t = useRef(null);
+
+    console.log(t);
 
     return (
         <div className="container">
             <h1>Configuration</h1>
             <button onClick={() => setHideNavigationButtons(!hideNavigationButtons)}>Toggle controls</button>
             <h1>Slides with fixed width</h1>
-            <Slider hideNavigationButtons={hideNavigationButtons}>
+            <Slider hideNavigationButtons={hideNavigationButtons} ref={t}>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(50, 50, 50)' }}>Slide 1</div>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(75, 75, 75)' }}>Slide 2</div>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(100, 100, 100)' }}>Slide 3</div>
