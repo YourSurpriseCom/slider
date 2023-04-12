@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Slider } from './Slider';
@@ -127,24 +127,32 @@ describe('UpsellSlider', () => {
             const clickSpy = jest.fn();
 
             render(<Slider>
-                <span data-testid="1" onClick={clickSpy}/>
+                <span key={ 1 }  data-testid="1" onClick={clickSpy}/>
             </Slider>);
 
             const scrollElement = screen.getByRole('list');
 
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseDown(scrollElement);
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseUp(scrollElement);
+            act(() => {
+                // eslint-disable-next-line testing-library/prefer-user-event
+                fireEvent.mouseDown(scrollElement);
+                // eslint-disable-next-line testing-library/prefer-user-event
+                fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
+                // eslint-disable-next-line testing-library/prefer-user-event
+                fireEvent.mouseUp(scrollElement);
+            });
 
             // This click is normally triggered when releasing the mouse after scrolling
-            await userEvent.click(scrollElement);
+            await act(() => {
+                userEvent.click(scrollElement);
+            });
 
-            await userEvent.click(screen.getByTestId('1'));
+            await act(() => {
+                userEvent.click(screen.getByTestId('1'));
+            });
 
-            expect(clickSpy).toHaveBeenCalled();
+            await waitFor(() => {
+                expect(clickSpy).toHaveBeenCalled();
+            });
         });
     });
 
