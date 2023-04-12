@@ -1,6 +1,6 @@
 import classNames from 'classnames';
-import type React, { MouseEvent as ReactMouseEvent, PropsWithChildren } from 'react';
-import { Children, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
+import { Children, forwardRef, PropsWithChildren, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { NextButton } from './Components/Controls/NextButton';
 import { PreviousButton } from './Components/Controls/PreviousButton';
 import { NavigationDirection, useSlider, Visibility } from './Hooks/UseSlider';
