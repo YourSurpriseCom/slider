@@ -194,7 +194,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
             targetSlide.element.clientWidth,
         );
 
-        wrapper.current.scrollTo({ behavior: smooth ? 'smooth' : 'instant', left: scrollLeft, top: 0 });
+        wrapper.current.scrollTo({ behavior: smooth ? 'smooth' : 'auto', left: scrollLeft, top: 0 });
 
     };
 
