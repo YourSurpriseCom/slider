@@ -14,18 +14,20 @@ interface SlideVisibilityEntry {
 export interface SliderSettings {
     // Sets whether the navigation buttons (next/prev) are no longer rendered
     hideNavigationButtons?: boolean;
+    initialSlideIndex?: number;
 }
 
 interface API {
     scrollToSlide: (index: number, smooth: boolean) => void;
 }
 
-export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ children, hideNavigationButtons = false }, ref) => {
+export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ children, hideNavigationButtons = false, initialSlideIndex = 0 }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
-    const wrapper = useRef<HTMLDivElement | null>(null);
+    const wrapper = useRef<HTMLDivElement>(null);
 
     const [nextArrowVisible, setNextArrowVisible] = useState<boolean>(false);
     const [prevArrowVisible, setPrevArrowVisible] = useState<boolean>(false);
+    const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(initialSlideIndex);
 
     const [isScrollable, setIsScrollable] = useState<boolean>(false);
     const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -59,6 +61,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
         window?.addEventListener('resize', checkScrollable);
 
         checkScrollable();
+        scrollToInitialSlide();
 
         return () => {
             window?.removeEventListener('resize', checkScrollable);
@@ -130,6 +133,12 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
         setNextArrowVisible(isScrollable && lastSlideFullyVisible === false);
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
 
+    const scrollToInitialSlide = useCallback(() => {
+        if(currentSlideIndex !== 0) {
+            scrollToSlide(currentSlideIndex, false);
+        }
+    }, []);
+
     useEffect(() => {
         if (!wrapper.current) {
             return () => {};
@@ -185,7 +194,6 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
             direction = NavigationDirection.PREV;
         }
 
-
         const scrollLeft = getLeftPositionToScrollTo(
             direction,
             targetSlide.element.offsetLeft,
@@ -194,6 +202,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
             targetSlide.element.clientWidth,
         );
 
+        setCurrentSlideIndex(index);
         wrapper.current.scrollTo({ behavior: smooth ? 'smooth' : 'auto', left: scrollLeft, top: 0 });
 
     };
@@ -218,6 +227,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
             targetSlide.element.clientWidth,
         );
 
+        setCurrentSlideIndex(targetSlideIndex);
         wrapper.current.scrollTo({ behavior: 'smooth', left: scrollLeft, top: 0 });
     };
 
