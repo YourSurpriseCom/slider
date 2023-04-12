@@ -17,7 +17,7 @@ export interface SliderSettings {
 }
 
 interface API {
-    scrollTo: (index: number, smooth: boolean) => void;
+    scrollToSlide: (index: number, smooth: boolean) => void;
 }
 
 export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ children, hideNavigationButtons = false }, ref) => {
@@ -172,7 +172,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
         getVisibilityByIntersectionRatio,
     ]);
 
-    const scrollTo = (index: number, smooth: boolean) => {
+    const scrollToSlide = (index: number, smooth: boolean) => {
         const targetSlide = slides.current[index];
 
         if (!targetSlide || !wrapper.current) {
@@ -222,7 +222,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
     };
 
     useImperativeHandle(ref, () => ({
-        scrollTo: scrollTo,
+        scrollToSlide: scrollToSlide,
     }));
 
     return (
