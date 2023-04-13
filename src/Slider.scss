@@ -27,7 +27,7 @@
 
     // Enable smooth scroll, but only when not dragging the slider with a mouse
     &:not(.is-dragging) {
-      scroll-behavior: auto;
+      scroll-behavior: smooth;
     }
 
     &.is-scrollable {
