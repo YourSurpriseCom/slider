@@ -49,43 +49,6 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
         removePartiallyVisibleSlide,
     } = useSlider();
 
-    useEffect(() => {
-        const currentWrapper = wrapper.current;
-
-        if (!currentWrapper) {
-            return () => {};
-        }
-
-        const checkScrollable = () => setIsScrollable(currentWrapper.scrollWidth > currentWrapper.clientWidth);
-
-        window?.addEventListener('resize', checkScrollable);
-
-        checkScrollable();
-        scrollToInitialSlide();
-
-        return () => {
-            window?.removeEventListener('resize', checkScrollable);
-        };
-    }, [wrapper]);
-
-    useEffect(() => {
-        const onDocumentMouseUp = (event: MouseEvent) => {
-            event.stopPropagation();
-            event.preventDefault();
-
-            setIsBlockingClicks(false);
-            setIsDragging(false);
-        };
-
-        if (isDragging) {
-            document?.addEventListener('mouseup', onDocumentMouseUp);
-        }
-
-        return () => {
-            document?.removeEventListener('mouseup', onDocumentMouseUp);
-        };
-    }, [isDragging]);
-
     const blockChildClickHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
         if (isBlockingClicks) {
             event.stopPropagation();
@@ -125,61 +88,6 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
             visibility: Visibility.NONE,
         };
     };
-
-    const setControlsVisibility = useCallback(() => {
-        const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
-
-        setPrevArrowVisible(getFirstVisibleSlideIndex() > 0 && isScrollable);
-        setNextArrowVisible(isScrollable && lastSlideFullyVisible === false);
-    }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
-
-    const scrollToInitialSlide = useCallback(() => {
-        if(currentSlideIndex !== 0) {
-            scrollToSlide(currentSlideIndex, false);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!wrapper.current) {
-            return () => {};
-        }
-
-        const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
-            entries.forEach((entry: IntersectionObserverEntry) => {
-                const target = entry.target as HTMLDivElement;
-                const index = Number(target.dataset.slideIndex);
-                const visibility = getVisibilityByIntersectionRatio(entry.intersectionRatio);
-
-                visibility === Visibility.FULL ? addVisibleSlide(index) : removeVisibleSlide(index);
-                visibility === Visibility.PARTIAL ? addPartiallyVisibleSlide(index) : removePartiallyVisibleSlide(index);
-            });
-
-            sortSlides();
-
-            if (hideNavigationButtons === false) {
-                setControlsVisibility();
-            }
-        };
-
-        const intersectionObserver = new IntersectionObserver(intersectionCallback, {
-            root: wrapper.current,
-            threshold: [0, 0.5, 0.9],
-        });
-
-        slides.current.forEach(({ element }) => intersectionObserver.observe(element));
-
-        return () => intersectionObserver.disconnect();
-    }, [
-        wrapper,
-        setControlsVisibility,
-        hideNavigationButtons,
-        sortSlides,
-        addVisibleSlide,
-        removeVisibleSlide,
-        addPartiallyVisibleSlide,
-        removePartiallyVisibleSlide,
-        getVisibilityByIntersectionRatio,
-    ]);
 
     const scrollToSlide = (index: number, smooth: boolean) => {
         const targetSlide = slides.current[index];
@@ -230,6 +138,112 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
         setCurrentSlideIndex(targetSlideIndex);
         wrapper.current.scrollTo({ behavior: 'smooth', left: scrollLeft, top: 0 });
     };
+
+    const setControlsVisibility = useCallback(() => {
+        const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
+
+        setPrevArrowVisible(getFirstVisibleSlideIndex() > 0 && isScrollable);
+        setNextArrowVisible(isScrollable && lastSlideFullyVisible === false);
+    }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
+
+    const scrollToInitialSlide = useCallback(() => {
+        if (currentSlideIndex !== 0) {
+            const targetSlide = slides.current[currentSlideIndex];
+
+            if (!targetSlide || !wrapper.current) {
+                return;
+            }
+
+            const scrollLeft = getLeftPositionToScrollTo(
+                NavigationDirection.NEXT,
+                targetSlide.element.offsetLeft,
+                wrapper.current.offsetLeft,
+                wrapper.current.clientWidth,
+                targetSlide.element.clientWidth,
+            );
+
+            wrapper.current.scrollTo({ behavior: 'auto', left: scrollLeft, top: 0 });
+        }
+    }, [currentSlideIndex, getLeftPositionToScrollTo]);
+
+    useEffect(() => {
+        const currentWrapper = wrapper.current;
+
+        if (!currentWrapper) {
+            return () => {};
+        }
+
+        const checkScrollable = () => setIsScrollable(currentWrapper.scrollWidth > currentWrapper.clientWidth);
+
+        window?.addEventListener('resize', checkScrollable);
+
+        checkScrollable();
+        scrollToInitialSlide();
+
+        return () => {
+            window?.removeEventListener('resize', checkScrollable);
+        };
+    }, [wrapper, scrollToInitialSlide]);
+
+    useEffect(() => {
+        const onDocumentMouseUp = (event: MouseEvent) => {
+            event.stopPropagation();
+            event.preventDefault();
+
+            setIsBlockingClicks(false);
+            setIsDragging(false);
+        };
+
+        if (isDragging) {
+            document?.addEventListener('mouseup', onDocumentMouseUp);
+        }
+
+        return () => {
+            document?.removeEventListener('mouseup', onDocumentMouseUp);
+        };
+    }, [isDragging]);
+
+    useEffect(() => {
+        if (!wrapper.current) {
+            return () => {};
+        }
+
+        const intersectionCallback = (entries: IntersectionObserverEntry[]) => {
+            entries.forEach((entry: IntersectionObserverEntry) => {
+                const target = entry.target as HTMLDivElement;
+                const index = Number(target.dataset.slideIndex);
+                const visibility = getVisibilityByIntersectionRatio(entry.intersectionRatio);
+
+                visibility === Visibility.FULL ? addVisibleSlide(index) : removeVisibleSlide(index);
+                visibility === Visibility.PARTIAL ? addPartiallyVisibleSlide(index) : removePartiallyVisibleSlide(index);
+            });
+
+            sortSlides();
+
+            if (hideNavigationButtons === false) {
+                setControlsVisibility();
+            }
+        };
+
+        const intersectionObserver = new IntersectionObserver(intersectionCallback, {
+            root: wrapper.current,
+            threshold: [0, 0.5, 0.9],
+        });
+
+        slides.current.forEach(({ element }) => intersectionObserver.observe(element));
+
+        return () => intersectionObserver.disconnect();
+    }, [
+        wrapper,
+        setControlsVisibility,
+        hideNavigationButtons,
+        sortSlides,
+        addVisibleSlide,
+        removeVisibleSlide,
+        addPartiallyVisibleSlide,
+        removePartiallyVisibleSlide,
+        getVisibilityByIntersectionRatio,
+    ]);
 
     useImperativeHandle(ref, () => ({
         scrollToSlide: scrollToSlide,
