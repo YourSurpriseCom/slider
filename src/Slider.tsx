@@ -115,7 +115,6 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
 
         setCurrentSlideIndex(index);
         currentWrapper.scrollTo({ behavior: smooth ? 'smooth' : 'auto', left: scrollLeft, top: 0 });
-
     };
 
     const navigate = (direction: NavigationDirection) => {

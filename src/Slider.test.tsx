@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Slider } from './Slider';
+import React from 'react';
 
 const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scrollLeft = 0) => {
     Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: clientWidth });
@@ -285,6 +286,37 @@ describe('UpsellSlider', () => {
                 expect(prevButton).toHaveAttribute('aria-hidden', String(prevButtonHidden));
                 expect(nextButton).toHaveAttribute('aria-hidden', String(nextButtonHidden));
             }
+        });
+    });
+
+    describe('scrollToSlide', () => {
+        it('scrolls to the next slide', async () => {
+            const ref = React.createRef();
+            render(<Slider ref={ref}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+            </Slider>);
+
+            const slides = screen.getAllByRole('listitem');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 500 });
+                Object.defineProperty(child, 'offsetLeft', { value: 500 * (i + 1) });
+            });
+
+            act(() => {
+                ref.current.scrollToSlide(2, true);
+            });
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: 1500,
+                    top: 0,
+                });
+            });
         });
     });
 
