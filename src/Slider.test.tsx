@@ -142,11 +142,11 @@ describe('UpsellSlider', () => {
             });
 
             // This click is normally triggered when releasing the mouse after scrolling
-            await act(() => {
+            act(() => {
                 userEvent.click(scrollElement);
             });
 
-            await act(() => {
+            act(() => {
                 userEvent.click(screen.getByTestId('1'));
             });
 
@@ -187,7 +187,7 @@ describe('UpsellSlider', () => {
                 Object.defineProperty(child, 'offsetLeft', { value: 100 * (i + 1) });
             });
 
-            await act(() => {
+            act(() => {
                 intersectionCallback([
                     { intersectionRatio: 1, target: slides[ 0 ] } as unknown as IntersectionObserverEntry,
                     { intersectionRatio: 0.5, target: slides[ 1 ] } as unknown as IntersectionObserverEntry,
@@ -196,12 +196,16 @@ describe('UpsellSlider', () => {
                 ]);
             });
 
-            await userEvent.click(nextButton);
+            act(() => {
+                userEvent.click(nextButton);
+            });
 
-            expect(scrollToSpy).toHaveBeenCalledWith({
-                behavior: 'smooth',
-                left: 200,
-                top: 0,
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: 200,
+                    top: 0,
+                });
             });
         });
 
@@ -216,7 +220,7 @@ describe('UpsellSlider', () => {
                 Object.defineProperty(child, 'offsetLeft', { value: 100 * (i + 1) });
             });
 
-            await act(() => {
+            act(() => {
                 intersectionCallback([
                     { intersectionRatio: 0, target: slides[ 0 ] } as unknown as IntersectionObserverEntry,
                     { intersectionRatio: 0, target: slides[ 1 ] } as unknown as IntersectionObserverEntry,
@@ -225,12 +229,16 @@ describe('UpsellSlider', () => {
                 ]);
             });
 
-            await userEvent.click(prevButton);
+            act(() => {
+                userEvent.click(prevButton);
+            });
 
-            expect(scrollToSpy).toHaveBeenCalledWith({
-                behavior: 'smooth',
-                left: -600,
-                top: 0,
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: -600,
+                    top: 0,
+                });
             });
         });
 
@@ -265,7 +273,7 @@ describe('UpsellSlider', () => {
                 const [intersections, prevButtonHidden, nextButtonHidden] = testCase;
 
                 // eslint-disable-next-line @typescript-eslint/no-loop-func
-                await act(() => {
+                act(() => {
                     intersectionCallback([
                         { intersectionRatio: intersections[0], target: slides[0] } as unknown as IntersectionObserverEntry,
                         { intersectionRatio: intersections[1], target: slides[1] } as unknown as IntersectionObserverEntry,
