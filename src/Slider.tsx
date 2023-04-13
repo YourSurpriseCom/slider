@@ -23,7 +23,7 @@ interface API {
 
 export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ children, hideNavigationButtons = false, initialSlideIndex = 0 }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
-    const wrapper = useRef<HTMLDivElement>(null);
+    const wrapper = useRef<HTMLDivElement | null>(null);
 
     const [nextArrowVisible, setNextArrowVisible] = useState<boolean>(false);
     const [prevArrowVisible, setPrevArrowVisible] = useState<boolean>(false);
@@ -71,7 +71,9 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
     };
 
     const mouseMoveHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
-        if (!wrapper.current || !isDragging) {
+        const currentWrapper = wrapper.current;
+
+        if (!currentWrapper || !isDragging) {
             return;
         }
 
@@ -79,7 +81,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
             setIsBlockingClicks(true);
         }
 
-        wrapper.current.scrollLeft = mousePosition.scrollX + mousePosition.clientX - event.clientX;
+        currentWrapper.scrollLeft = mousePosition.scrollX + mousePosition.clientX - event.clientX;
     };
 
     const addSlide = (node: HTMLDivElement, index: number) => {
@@ -91,8 +93,9 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
 
     const scrollToSlide = (index: number, smooth: boolean) => {
         const targetSlide = slides.current[index];
+        const currentWrapper = wrapper.current;
 
-        if (!targetSlide || !wrapper.current) {
+        if (!targetSlide || !currentWrapper) {
             return;
         }
 
@@ -105,18 +108,20 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
         const scrollLeft = getLeftPositionToScrollTo(
             direction,
             targetSlide.element.offsetLeft,
-            wrapper.current.offsetLeft,
-            wrapper.current.clientWidth,
+            currentWrapper.offsetLeft,
+            currentWrapper.clientWidth,
             targetSlide.element.clientWidth,
         );
 
         setCurrentSlideIndex(index);
-        wrapper.current.scrollTo({ behavior: smooth ? 'smooth' : 'auto', left: scrollLeft, top: 0 });
+        currentWrapper.scrollTo({ behavior: smooth ? 'smooth' : 'auto', left: scrollLeft, top: 0 });
 
     };
 
     const navigate = (direction: NavigationDirection) => {
-        if (!wrapper.current) {
+        const currentWrapper = wrapper.current;
+
+        if (!currentWrapper) {
             return;
         }
 
@@ -130,39 +135,40 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
         const scrollLeft = getLeftPositionToScrollTo(
             direction,
             targetSlide.element.offsetLeft,
-            wrapper.current.offsetLeft,
-            wrapper.current.clientWidth,
+            currentWrapper.offsetLeft,
+            currentWrapper.clientWidth,
             targetSlide.element.clientWidth,
         );
 
         setCurrentSlideIndex(targetSlideIndex);
-        wrapper.current.scrollTo({ behavior: 'smooth', left: scrollLeft, top: 0 });
+        currentWrapper.scrollTo({ behavior: 'smooth', left: scrollLeft, top: 0 });
     };
 
     const setControlsVisibility = useCallback(() => {
         const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
 
         setPrevArrowVisible(getFirstVisibleSlideIndex() > 0 && isScrollable);
-        setNextArrowVisible(isScrollable && lastSlideFullyVisible === false);
+        setNextArrowVisible(isScrollable && !lastSlideFullyVisible);
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
 
     const scrollToInitialSlide = useCallback(() => {
         if (currentSlideIndex !== 0) {
             const targetSlide = slides.current[currentSlideIndex];
+            const currentWrapper = wrapper.current;
 
-            if (!targetSlide || !wrapper.current) {
+            if (!targetSlide || !currentWrapper) {
                 return;
             }
 
             const scrollLeft = getLeftPositionToScrollTo(
                 NavigationDirection.NEXT,
                 targetSlide.element.offsetLeft,
-                wrapper.current.offsetLeft,
-                wrapper.current.clientWidth,
+                currentWrapper.offsetLeft,
+                currentWrapper.clientWidth,
                 targetSlide.element.clientWidth,
             );
 
-            wrapper.current.scrollTo({ behavior: 'auto', left: scrollLeft, top: 0 });
+            currentWrapper.scrollTo({ behavior: 'auto', left: scrollLeft, top: 0 });
         }
     }, [currentSlideIndex, getLeftPositionToScrollTo]);
 
@@ -204,7 +210,9 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
     }, [isDragging]);
 
     useEffect(() => {
-        if (!wrapper.current) {
+        const currentWrapper = wrapper.current;
+
+        if (!currentWrapper) {
             return () => {};
         }
 
@@ -220,13 +228,13 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
 
             sortSlides();
 
-            if (hideNavigationButtons === false) {
+            if (!hideNavigationButtons) {
                 setControlsVisibility();
             }
         };
 
         const intersectionObserver = new IntersectionObserver(intersectionCallback, {
-            root: wrapper.current,
+            root: currentWrapper,
             threshold: [0, 0.5, 0.9],
         });
 
@@ -267,10 +275,10 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderSettings>>(({ chil
                     </div>
                 ))}
             </div>
-            { hideNavigationButtons === false && (
+            { !hideNavigationButtons && (
                 <>
-                    <PreviousButton onClick={() => navigate(NavigationDirection.PREV)} isHidden={prevArrowVisible === false}/>
-                    <NextButton onClick={() => navigate(NavigationDirection.NEXT)} isHidden={nextArrowVisible === false}/>
+                    <PreviousButton onClick={() => navigate(NavigationDirection.PREV)} isHidden={!prevArrowVisible}/>
+                    <NextButton onClick={() => navigate(NavigationDirection.NEXT)} isHidden={!nextArrowVisible}/>
                 </>
             )}
         </div>
