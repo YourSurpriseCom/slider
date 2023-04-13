@@ -331,7 +331,7 @@ describe('UpsellSlider', () => {
 
             await waitFor(() => {
                 expect(scrollToSpy).toHaveBeenCalledWith({
-                    behavior: 'auto',
+                    behavior: 'instant',
                     left: 0,
                     top: 0,
                 });
