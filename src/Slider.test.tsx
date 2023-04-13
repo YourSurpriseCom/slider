@@ -287,4 +287,23 @@ describe('UpsellSlider', () => {
             }
         });
     });
+
+    describe('initialSlideIndex', () => {
+        it('Opens the slider with the initialSlide', async () => {
+            render(<Slider initialSlideIndex={2}>
+                <span key={ 1 } data-testid="child-1"/>
+                <span key={ 2 } data-testid="child-2"/>
+                <span key={ 3 } data-testid="child-3"/>
+                <span key={ 4 } data-testid="child-4"/>
+            </Slider>);
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'auto',
+                    left: 0,
+                    top: 0,
+                });
+            });
+        });
+    });
 });
