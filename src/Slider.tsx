@@ -29,7 +29,6 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderTypes.Settings>>((
 
     const [nextArrowVisible, setNextArrowVisible] = useState<boolean>(false);
     const [prevArrowVisible, setPrevArrowVisible] = useState<boolean>(false);
-    const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(initialSlideIndex);
 
     const [isScrollable, setIsScrollable] = useState<boolean>(false);
     const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -115,7 +114,6 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderTypes.Settings>>((
             targetSlide.element.clientWidth,
         );
 
-        setCurrentSlideIndex(index);
         currentWrapper.scrollTo({ behavior: smooth ? 'smooth' : 'auto', left: scrollLeft, top: 0 });
     };
 
@@ -127,22 +125,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderTypes.Settings>>((
         }
 
         const targetSlideIndex = direction === NavigationDirection.PREV ? getFirstVisibleSlideIndex() - 1 : getLastVisibleSlideIndex() + 1;
-        const targetSlide = slides.current[targetSlideIndex];
-
-        if (!targetSlide) {
-            return;
-        }
-
-        const scrollLeft = getLeftPositionToScrollTo(
-            direction,
-            targetSlide.element.offsetLeft,
-            currentWrapper.offsetLeft,
-            currentWrapper.clientWidth,
-            targetSlide.element.clientWidth,
-        );
-
-        setCurrentSlideIndex(targetSlideIndex);
-        currentWrapper.scrollTo({ behavior: 'smooth', left: scrollLeft, top: 0 });
+        scrollToSlide(targetSlideIndex, true);
     };
 
     const setControlsVisibility = useCallback(() => {
@@ -151,27 +134,6 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderTypes.Settings>>((
         setPrevArrowVisible(getFirstVisibleSlideIndex() > 0 && isScrollable);
         setNextArrowVisible(isScrollable && !lastSlideFullyVisible);
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
-
-    const scrollToInitialSlide = useCallback(() => {
-        if (currentSlideIndex !== 0) {
-            const targetSlide = slides.current[currentSlideIndex];
-            const currentWrapper = wrapper.current;
-
-            if (!targetSlide || !currentWrapper) {
-                return;
-            }
-
-            const scrollLeft = getLeftPositionToScrollTo(
-                NavigationDirection.NEXT,
-                targetSlide.element.offsetLeft,
-                currentWrapper.offsetLeft,
-                currentWrapper.clientWidth,
-                targetSlide.element.clientWidth,
-            );
-
-            currentWrapper.scrollTo({ behavior: 'instant', left: scrollLeft, top: 0 });
-        }
-    }, [currentSlideIndex, getLeftPositionToScrollTo]);
 
     useEffect(() => {
         const currentWrapper = wrapper.current;
@@ -182,6 +144,20 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderTypes.Settings>>((
 
         const checkScrollable = () => setIsScrollable(currentWrapper.scrollWidth > currentWrapper.clientWidth);
 
+        const scrollToInitialSlide = () => {
+            if (initialSlideIndex !== 0) {
+                const targetSlide = slides.current[initialSlideIndex];
+
+                if (!targetSlide || !currentWrapper) {
+                    return;
+                }
+
+                const scrollLeft = targetSlide.element.offsetLeft - currentWrapper.offsetLeft;
+
+                currentWrapper.scrollTo({ behavior: 'instant', left: scrollLeft, top: 0 });
+            }
+        };
+
         window?.addEventListener('resize', checkScrollable);
 
         checkScrollable();
@@ -190,7 +166,7 @@ export const Slider = forwardRef<API, PropsWithChildren<SliderTypes.Settings>>((
         return () => {
             window?.removeEventListener('resize', checkScrollable);
         };
-    }, [wrapper, scrollToInitialSlide]);
+    }, [wrapper, initialSlideIndex]);
 
     useEffect(() => {
         const onDocumentMouseUp = (event: MouseEvent) => {
