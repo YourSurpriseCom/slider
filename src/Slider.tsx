@@ -18,6 +18,7 @@ interface Settings {
     // Sets whether the navigation buttons (next/prev) are no longer rendered
     hideNavigationButtons?: boolean;
     initialSlideIndex?: number;
+    onSlide?: () => void;
 }
 
 interface SlideVisibilityEntry {
@@ -25,7 +26,7 @@ interface SlideVisibilityEntry {
     visibility: Visibility;
 }
 
-export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>(({ children, hideNavigationButtons = false, initialSlideIndex = 0 }, ref) => {
+export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>(({ children, hideNavigationButtons = false, initialSlideIndex = 0, onSlide = () => null }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement | null>(null);
 
@@ -206,6 +207,8 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             if (!hideNavigationButtons) {
                 setControlsVisibility();
             }
+
+            onSlide();
         };
 
         const intersectionObserver = new IntersectionObserver(intersectionCallback, {
@@ -226,6 +229,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         addPartiallyVisibleSlide,
         removePartiallyVisibleSlide,
         getVisibilityByIntersectionRatio,
+        onSlide,
     ]);
 
     useImperativeHandle(ref, () => ({
