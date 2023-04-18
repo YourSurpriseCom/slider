@@ -20,6 +20,11 @@ jobs:
       - name: Set version
         run: npm version ${{ github.ref_name }} --no-git-tag-version
       - name: Publish
-        run: npm publish
+        run: |
+          if [[ ${{ github.ref_name }} == *"beta"* ]]; then
+            npm publish --tag beta
+          else
+            npm publish
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -2,6 +2,8 @@ name: Publish to pages
 on:
   release:
     types: [created]
+    tags-ignore:        
+    - '**beta**'
 jobs:
   publish:
     runs-on: ubuntu-latest
