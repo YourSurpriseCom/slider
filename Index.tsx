@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import './Index.scss';
 import { SliderTypes } from "./src/Slider";
 import API = SliderTypes.API;
+import OnSlideExample from './src/Examples/OnSlideExample';
 
 const Index: React.FC = () => {
     const [hideNavigationButtons, setHideNavigationButtons] = useState<boolean>(false);
@@ -67,6 +68,7 @@ const Index: React.FC = () => {
                 <img draggable={false} loading="lazy" className="demo-slide" width="300" height="200" alt="Slide 5" src="https://via.placeholder.com/300x200/333333"/>
                 <img draggable={false} loading="lazy" className="demo-slide" width="300" height="200" alt="Slide 6" src="https://via.placeholder.com/300x200/333333"/>
             </Slider>
+            <OnSlideExample/>
         </div>
     );
 };

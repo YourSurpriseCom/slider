@@ -13,6 +13,7 @@ const config: Partial<Config.ConfigGlobals> = {
     collectCoverageFrom: [
         'src/**/*.{js,ts,tsx}',
         '!src/index.ts',
+        '!src/Examples/**',
     ],
 
     // The directory where Jest should output its coverage files
