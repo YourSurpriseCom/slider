@@ -22,7 +22,7 @@ jobs:
       - name: Publish
         run: |
           if [[ ${{ github.ref_name }} == *"beta"* ]]; then
-            npm publish --tag alpha
+            npm publish --tag beta
           else
             npm publish
           fi
