@@ -3,7 +3,7 @@ on:
   release:
     types: [created]
     tags-ignore:        
-    - '**alpha**'
+    - '**beta**'
 jobs:
   publish:
     runs-on: ubuntu-latest

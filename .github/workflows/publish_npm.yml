@@ -21,7 +21,7 @@ jobs:
         run: npm version ${{ github.ref_name }} --no-git-tag-version
       - name: Publish
         run: |
-          if [[ ${{ github.ref_name }} == *"alpha"* ]]; then
+          if [[ ${{ github.ref_name }} == *"beta"* ]]; then
             npm publish --tag alpha
           else
             npm publish
