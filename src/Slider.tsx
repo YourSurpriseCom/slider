@@ -213,7 +213,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
         const intersectionObserver = new IntersectionObserver(intersectionCallback, {
             root: currentWrapper,
-            threshold: [0, 0.5, 0.9],
+            threshold: [0, 0.5, 0.9, 1],
         });
 
         slides.current.forEach(({ element }) => intersectionObserver.observe(element));
