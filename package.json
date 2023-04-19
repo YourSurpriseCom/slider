@@ -16,6 +16,7 @@
     "test": "jest",
     "lint": "eslint src/",
     "build": "rm -rf ./dist && rollup -c --bundleConfigAsCjs",
+    "tsc": "tsc -p tsconfig-check.json",
     "build-pages": "rm -rf ./dist && parcel build index.html --public-url ./",
     "watch": "rollup -c -w --bundleConfigAsCjs",
     "serve": "parcel index.html",
