@@ -1,8 +1,9 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { Slider } from './Slider';
+import { Slider, SliderTypes } from './Slider';
 import React from 'react';
+import API = SliderTypes.API;
 
 const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scrollLeft = 0) => {
     Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: clientWidth });
@@ -291,7 +292,7 @@ describe('UpsellSlider', () => {
 
     describe('scrollToSlide', () => {
         it('scrolls to the next slide', async () => {
-            const ref = React.createRef();
+            const ref = React.createRef<API>();
             render(<Slider ref={ref}>
                 <span key={1}/>
                 <span key={2}/>
@@ -307,7 +308,9 @@ describe('UpsellSlider', () => {
             });
 
             act(() => {
-                ref.current.scrollToSlide(2, true);
+                if (ref.current !== null) {
+                    ref.current.scrollToSlide(2, true);
+                }
             });
 
             await waitFor(() => {

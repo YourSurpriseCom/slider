@@ -12,6 +12,10 @@ export namespace SliderTypes {
         hideNavigationButtons?: boolean;
         initialSlideIndex?: number;
     }
+
+    export interface API {
+        scrollToSlide: (index: number, smooth: boolean) => void;
+    }
 }
 
 interface SlideVisibilityEntry {
@@ -19,11 +23,7 @@ interface SlideVisibilityEntry {
     visibility: Visibility;
 }
 
-interface API {
-    scrollToSlide: (index: number, smooth: boolean) => void;
-}
-
-export const Slider = forwardRef<API, PropsWithChildren<SliderTypes.Settings>>(({ children, hideNavigationButtons = false, initialSlideIndex = 0 }, ref) => {
+export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<SliderTypes.Settings>>(({ children, hideNavigationButtons = false, initialSlideIndex = 0 }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement | null>(null);
 

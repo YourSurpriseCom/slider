@@ -2,10 +2,12 @@ import React, { useRef, useState } from 'react';
 import { Slider } from './src/index';
 import { createRoot } from 'react-dom/client';
 import './Index.scss';
+import { SliderTypes } from "./src/Slider";
+import API = SliderTypes.API;
 
 const Index: React.FC = () => {
     const [hideNavigationButtons, setHideNavigationButtons] = useState<boolean>(false);
-    const sliderRefObject = useRef(null);
+    const sliderRefObject = useRef<API>(null);
 
     return (
         <div className="container">
@@ -45,7 +47,7 @@ const Index: React.FC = () => {
                 <div className="demo-slide" style={{ width: '75px', height: '200px', backgroundColor: 'rgb(225, 225, 225)' }}>Slide 8</div>
             </Slider>
             <h1>Slides with ScrollToSlide button</h1>
-            <button onClick={() => sliderRefObject.current.scrollToSlide(2, true)}>Scroll to slideIndex 2 (Slide 3)</button>
+            <button onClick={() => sliderRefObject.current !== null && sliderRefObject.current.scrollToSlide(2, true)}>Scroll to slideIndex 2 (Slide 3)</button>
             <Slider hideNavigationButtons={hideNavigationButtons} ref={sliderRefObject}>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(50, 50, 50)' }}>Slide 1</div>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(75, 75, 75)' }}>Slide 2</div>
