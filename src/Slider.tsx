@@ -7,15 +7,15 @@ import { NavigationDirection, useSlider, Visibility } from './Hooks/UseSlider';
 import './Slider.scss';
 
 export namespace SliderTypes {
-    export interface Settings {
-        // Sets whether the navigation buttons (next/prev) are no longer rendered
-        hideNavigationButtons?: boolean;
-        initialSlideIndex?: number;
-    }
-
     export interface API {
         scrollToSlide: (index: number, behaviour: ScrollBehavior) => void;
     }
+}
+
+interface Settings {
+    // Sets whether the navigation buttons (next/prev) are no longer rendered
+    hideNavigationButtons?: boolean;
+    initialSlideIndex?: number;
 }
 
 interface SlideVisibilityEntry {
@@ -23,7 +23,7 @@ interface SlideVisibilityEntry {
     visibility: Visibility;
 }
 
-export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<SliderTypes.Settings>>(({ children, hideNavigationButtons = false, initialSlideIndex = 0 }, ref) => {
+export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>(({ children, hideNavigationButtons = false, initialSlideIndex = 0 }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement | null>(null);
 
