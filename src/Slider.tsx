@@ -9,6 +9,8 @@ import './Slider.scss';
 export namespace SliderTypes {
     export interface API {
         scrollToSlide: (index: number, behaviour: ScrollBehavior) => void;
+        getFirstFullyVisibleSlideIndex(): number;
+        getLastFullyVisibleSlideIndex(): number;
     }
 }
 
@@ -228,6 +230,8 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
     useImperativeHandle(ref, () => ({
         scrollToSlide: scrollToSlide,
+        getFirstFullyVisibleSlideIndex: getFirstVisibleSlideIndex,
+        getLastFullyVisibleSlideIndex: getLastVisibleSlideIndex,
     }));
 
     return (
