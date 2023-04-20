@@ -320,4 +320,51 @@ describe('UpsellSlider', () => {
             });
         });
     });
+
+    describe('onSlide', function () {
+        it('calls the onSlide callback when an intersection occurs', () => {
+            const onSlideSpy = jest.fn();
+            render(<Slider onSlide={onSlideSpy}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+            </Slider>);
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+            intersectionCallback([], mockIntersectionObserver.mock.instances[0]);
+
+            expect(onSlideSpy).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('visible slide indexes', () => {
+        it('retrieves the first and last fully visible slide indices', () => {
+            const ref = React.createRef<API>();
+            render(<Slider ref={ref}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+                <span key={5}/>
+            </Slider>);
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+
+            const slides = screen.getAllByRole('listitem');
+
+            intersectionCallback([
+                { intersectionRatio: 1, target: slides[0] } as unknown as IntersectionObserverEntry,
+                { intersectionRatio: 1, target: slides[1] } as unknown as IntersectionObserverEntry,
+                { intersectionRatio: 1, target: slides[2] } as unknown as IntersectionObserverEntry,
+                { intersectionRatio: .5, target: slides[3] } as unknown as IntersectionObserverEntry,
+                { intersectionRatio: 0, target: slides[4] } as unknown as IntersectionObserverEntry,
+            ], mockIntersectionObserver.mock.instances[0]);
+
+            expect(ref.current!.getFirstFullyVisibleSlideIndex()).toBe(0);
+            expect(ref.current!.getLastFullyVisibleSlideIndex()).toBe(2);
+        });
+    });
 });
