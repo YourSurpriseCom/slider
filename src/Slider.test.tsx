@@ -8,7 +8,11 @@ import API = SliderTypes.API;
 const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scrollLeft = 0) => {
     Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: clientWidth });
     Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: scrollWidth });
-    Object.defineProperty(HTMLElement.prototype, 'scrollLeft', { configurable: true, value: scrollLeft, writable: true });
+    Object.defineProperty(HTMLElement.prototype, 'scrollLeft', {
+        configurable: true,
+        value: scrollLeft,
+        writable: true,
+    });
 
     render(<Slider>
         <span key={1}/>
@@ -19,20 +23,26 @@ const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scro
 };
 
 describe('UpsellSlider', () => {
+    let mockIntersectionObserver: jest.Mock<IntersectionObserver, ConstructorParameters<typeof IntersectionObserver>>;
     let observeSpy: jest.Mock;
     let disconnectSpy: jest.Mock;
     let scrollToSpy: jest.Mock;
 
+    const getIntersectionObserverInstance = () => mockIntersectionObserver.mock.calls[mockIntersectionObserver.mock.calls.length - 1];
+
     beforeEach(() => {
-        const mockIntersectionObserver = jest.fn();
         observeSpy = jest.fn();
         disconnectSpy = jest.fn();
         scrollToSpy = jest.fn();
 
-        mockIntersectionObserver.mockReturnValue({
+        mockIntersectionObserver = jest.fn().mockReturnValue({
             disconnect: disconnectSpy,
             observe: observeSpy,
             unobserve: () => jest.fn(),
+            root: null,
+            rootMargin: '',
+            thresholds: [],
+            takeRecords: jest.fn(),
         });
         global.IntersectionObserver = mockIntersectionObserver;
         Element.prototype.scrollTo = scrollToSpy;
@@ -52,13 +62,13 @@ describe('UpsellSlider', () => {
 
     it('keeps track of the visibility of children', () => {
         const children = [
-            <span key={ 1 } data-testid="child-1"/>,
-            <span key={ 2 } data-testid="child-2"/>,
-            <span key={ 3 } data-testid="child-3"/>,
-            <span key={ 4 } data-testid="child-4"/>,
+            <span key={1} data-testid="child-1"/>,
+            <span key={2} data-testid="child-2"/>,
+            <span key={3} data-testid="child-3"/>,
+            <span key={4} data-testid="child-4"/>,
         ];
 
-        render(<Slider>{ children }</Slider>);
+        render(<Slider>{children}</Slider>);
         expect(observeSpy).toHaveBeenCalledTimes(children.length);
     });
 
@@ -129,7 +139,7 @@ describe('UpsellSlider', () => {
             const clickSpy = jest.fn();
 
             render(<Slider>
-                <span key={ 1 }  data-testid="1" onClick={clickSpy}/>
+                <span key={1} data-testid="1" onClick={clickSpy}/>
             </Slider>);
 
             const scrollElement = screen.getByRole('list');
@@ -153,27 +163,11 @@ describe('UpsellSlider', () => {
     });
 
     describe('sliding', () => {
-        let intersectionCallback: (entries: IntersectionObserverEntry[]) => void;
-
-        beforeEach(() => {
-            const mockIntersectionObserver = jest.fn();
-            intersectionCallback = jest.fn();
-
-            mockIntersectionObserver.mockImplementation((callback: (entries: IntersectionObserverEntry[]) => void) => {
-                intersectionCallback = callback;
-
-                return ({
-                    disconnect: jest.fn(),
-                    observe: jest.fn(),
-                    unobserve: jest.fn(),
-                });
-            });
-
-            global.IntersectionObserver = mockIntersectionObserver;
-        });
-
         it('scrolls to the next slide', async () => {
             renderSliderWithDimensions();
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
 
             const slides = screen.getAllByRole('listitem');
             const nextButton = screen.getByLabelText('Next slide');
@@ -185,11 +179,11 @@ describe('UpsellSlider', () => {
 
             act(() => {
                 intersectionCallback([
-                    { intersectionRatio: 1, target: slides[ 0 ] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: 0.5, target: slides[ 1 ] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: 0, target: slides[ 2 ] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: 0, target: slides[ 3 ] } as unknown as IntersectionObserverEntry,
-                ]);
+                    { intersectionRatio: 1, target: slides[0] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0.5, target: slides[1] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[2] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[3] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
             });
 
             await userEvent.click(nextButton);
@@ -206,6 +200,9 @@ describe('UpsellSlider', () => {
         it('scrolls to the previous slide', async () => {
             renderSliderWithDimensions();
 
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+
             const slides = screen.getAllByRole('listitem');
             const prevButton = screen.getByLabelText('Previous slide');
 
@@ -216,11 +213,11 @@ describe('UpsellSlider', () => {
 
             act(() => {
                 intersectionCallback([
-                    { intersectionRatio: 0, target: slides[ 0 ] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: 0, target: slides[ 1 ] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: 1, target: slides[ 2 ] } as unknown as IntersectionObserverEntry,
-                    { intersectionRatio: 0.5, target: slides[ 3 ] } as unknown as IntersectionObserverEntry,
-                ]);
+                    { intersectionRatio: 0, target: slides[0] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[1] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 1, target: slides[2] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0.5, target: slides[3] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
             });
 
             await userEvent.click(prevButton);
@@ -234,10 +231,19 @@ describe('UpsellSlider', () => {
             });
         });
 
-        it('updates controls visibility', async () => {
+        it.each([
+            ['all slides are visible', [1, 1, 1, 1], true, true],
+            ['only the first slide is not visible', [0, 1, 1, 1], false, true],
+            ['only the last slide is not visible', [1, 1, 1, 0], true, false],
+            ['only a single slide is partially visible', [0, 0, 0.5, 0], false, false],
+        ])('updates controls visibility when %s', (testCase, intersections, prevButtonHidden, nextButtonHidden) => {
             Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 500 });
             Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: 1000 });
-            Object.defineProperty(HTMLElement.prototype, 'scrollLeft', { configurable: true, value: 0, writable: true });
+            Object.defineProperty(HTMLElement.prototype, 'scrollLeft', {
+                configurable: true,
+                value: 0,
+                writable: true,
+            });
 
             render(<Slider>
                 <span key={1}/>
@@ -246,37 +252,24 @@ describe('UpsellSlider', () => {
                 <span key={4}/>
             </Slider>);
 
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+
             const slides = screen.getAllByRole('listitem');
             const nextButton = screen.getByLabelText('Next slide');
             const prevButton = screen.getByLabelText('Previous slide');
 
-            const testCases = [
-                // All slides are visible
-                [[1, 1, 1, 1], true, true],
-                // Only the first slide is not visible
-                [[0, 1, 1, 1], false, true],
-                // Only the last slide is not visible
-                [[1, 1, 1, 0], true, false],
-                // Only a single slide is partially visible
-                [[0, 0, 0.5, 0], false, false],
-            ] as Array<[number[], boolean, boolean]>;
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: intersections[0], target: slides[0] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: intersections[1], target: slides[1] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: intersections[2], target: slides[2] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: intersections[3], target: slides[3] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
 
-            for (const testCase of testCases) {
-                const [intersections, prevButtonHidden, nextButtonHidden] = testCase;
-
-                // eslint-disable-next-line @typescript-eslint/no-loop-func
-                act(() => {
-                    intersectionCallback([
-                        { intersectionRatio: intersections[0], target: slides[0] } as unknown as IntersectionObserverEntry,
-                        { intersectionRatio: intersections[1], target: slides[1] } as unknown as IntersectionObserverEntry,
-                        { intersectionRatio: intersections[2], target: slides[2] } as unknown as IntersectionObserverEntry,
-                        { intersectionRatio: intersections[3], target: slides[3] } as unknown as IntersectionObserverEntry,
-                    ]);
-                });
-
-                expect(prevButton).toHaveAttribute('aria-hidden', String(prevButtonHidden));
-                expect(nextButton).toHaveAttribute('aria-hidden', String(nextButtonHidden));
-            }
+            expect(prevButton).toHaveAttribute('aria-hidden', String(prevButtonHidden));
+            expect(nextButton).toHaveAttribute('aria-hidden', String(nextButtonHidden));
         });
     });
 
@@ -316,10 +309,10 @@ describe('UpsellSlider', () => {
     describe('initialSlideIndex', () => {
         it('Opens the slider with the initialSlide', async () => {
             render(<Slider initialSlideIndex={2}>
-                <span key={ 1 } data-testid="child-1"/>
-                <span key={ 2 } data-testid="child-2"/>
-                <span key={ 3 } data-testid="child-3"/>
-                <span key={ 4 } data-testid="child-4"/>
+                <span key={1} data-testid="child-1"/>
+                <span key={2} data-testid="child-2"/>
+                <span key={3} data-testid="child-3"/>
+                <span key={4} data-testid="child-4"/>
             </Slider>);
 
             await waitFor(() => {
