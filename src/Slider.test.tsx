@@ -134,23 +134,17 @@ describe('UpsellSlider', () => {
 
             const scrollElement = screen.getByRole('list');
 
-            act(() => {
-                // eslint-disable-next-line testing-library/prefer-user-event
-                fireEvent.mouseDown(scrollElement);
-                // eslint-disable-next-line testing-library/prefer-user-event
-                fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
-                // eslint-disable-next-line testing-library/prefer-user-event
-                fireEvent.mouseUp(scrollElement);
-            });
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseDown(scrollElement);
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
+            // eslint-disable-next-line testing-library/prefer-user-event
+            fireEvent.mouseUp(scrollElement);
 
             // This click is normally triggered when releasing the mouse after scrolling
-            act(() => {
-                userEvent.click(scrollElement);
-            });
+            await userEvent.click(scrollElement);
 
-            act(() => {
-                userEvent.click(screen.getByTestId('1'));
-            });
+            await userEvent.click(screen.getByTestId('1'));
 
             await waitFor(() => {
                 expect(clickSpy).toHaveBeenCalled();
@@ -198,9 +192,7 @@ describe('UpsellSlider', () => {
                 ]);
             });
 
-            act(() => {
-                userEvent.click(nextButton);
-            });
+            await userEvent.click(nextButton);
 
             await waitFor(() => {
                 expect(scrollToSpy).toHaveBeenCalledWith({
@@ -231,9 +223,7 @@ describe('UpsellSlider', () => {
                 ]);
             });
 
-            act(() => {
-                userEvent.click(prevButton);
-            });
+            await userEvent.click(prevButton);
 
             await waitFor(() => {
                 expect(scrollToSpy).toHaveBeenCalledWith({
