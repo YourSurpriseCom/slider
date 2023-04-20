@@ -100,11 +100,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<SliderTypes.
             return;
         }
 
-        let direction = NavigationDirection.NEXT;
-
-        if (getFirstVisibleSlideIndex() > index) {
-            direction = NavigationDirection.PREV;
-        }
+        const direction = (index > getFirstVisibleSlideIndex()) ? NavigationDirection.NEXT : NavigationDirection.PREV;
 
         const scrollLeft = getLeftPositionToScrollTo(
             direction,
