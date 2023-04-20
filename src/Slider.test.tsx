@@ -309,7 +309,7 @@ describe('UpsellSlider', () => {
 
             act(() => {
                 if (ref.current !== null) {
-                    ref.current.scrollToSlide(2, true);
+                    ref.current.scrollToSlide(2, 'smooth');
                 }
             });
 

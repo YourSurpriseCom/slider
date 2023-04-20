@@ -14,7 +14,7 @@ export namespace SliderTypes {
     }
 
     export interface API {
-        scrollToSlide: (index: number, smooth: boolean) => void;
+        scrollToSlide: (index: number, behaviour: ScrollBehavior) => void;
     }
 }
 
@@ -92,7 +92,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<SliderTypes.
         };
     };
 
-    const scrollToSlide = (index: number, smooth: boolean) => {
+    const scrollToSlide = (index: number, behavior: ScrollBehavior) => {
         const targetSlide = slides.current[index];
         const currentWrapper = wrapper.current;
 
@@ -114,7 +114,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<SliderTypes.
             targetSlide.element.clientWidth,
         );
 
-        currentWrapper.scrollTo({ behavior: smooth ? 'smooth' : 'auto', left: scrollLeft, top: 0 });
+        currentWrapper.scrollTo({ behavior, left: scrollLeft, top: 0 });
     };
 
     const navigate = (direction: NavigationDirection) => {
@@ -125,7 +125,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<SliderTypes.
         }
 
         const targetSlideIndex = direction === NavigationDirection.PREV ? getFirstVisibleSlideIndex() - 1 : getLastVisibleSlideIndex() + 1;
-        scrollToSlide(targetSlideIndex, true);
+        scrollToSlide(targetSlideIndex, 'smooth');
     };
 
     const setControlsVisibility = useCallback(() => {
