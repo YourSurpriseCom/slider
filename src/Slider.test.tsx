@@ -1,7 +1,9 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { Slider } from './Slider';
+import { Slider, SliderTypes } from './Slider';
+import React from 'react';
+import API = SliderTypes.API;
 
 const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scrollLeft = 0) => {
     Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: clientWidth });
@@ -127,7 +129,7 @@ describe('UpsellSlider', () => {
             const clickSpy = jest.fn();
 
             render(<Slider>
-                <span data-testid="1" onClick={clickSpy}/>
+                <span key={ 1 }  data-testid="1" onClick={clickSpy}/>
             </Slider>);
 
             const scrollElement = screen.getByRole('list');
@@ -144,7 +146,9 @@ describe('UpsellSlider', () => {
 
             await userEvent.click(screen.getByTestId('1'));
 
-            expect(clickSpy).toHaveBeenCalled();
+            await waitFor(() => {
+                expect(clickSpy).toHaveBeenCalledTimes(1);
+            });
         });
     });
 
@@ -179,7 +183,7 @@ describe('UpsellSlider', () => {
                 Object.defineProperty(child, 'offsetLeft', { value: 100 * (i + 1) });
             });
 
-            await act(() => {
+            act(() => {
                 intersectionCallback([
                     { intersectionRatio: 1, target: slides[ 0 ] } as unknown as IntersectionObserverEntry,
                     { intersectionRatio: 0.5, target: slides[ 1 ] } as unknown as IntersectionObserverEntry,
@@ -190,10 +194,12 @@ describe('UpsellSlider', () => {
 
             await userEvent.click(nextButton);
 
-            expect(scrollToSpy).toHaveBeenCalledWith({
-                behavior: 'smooth',
-                left: 200,
-                top: 0,
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: 200,
+                    top: 0,
+                });
             });
         });
 
@@ -208,7 +214,7 @@ describe('UpsellSlider', () => {
                 Object.defineProperty(child, 'offsetLeft', { value: 100 * (i + 1) });
             });
 
-            await act(() => {
+            act(() => {
                 intersectionCallback([
                     { intersectionRatio: 0, target: slides[ 0 ] } as unknown as IntersectionObserverEntry,
                     { intersectionRatio: 0, target: slides[ 1 ] } as unknown as IntersectionObserverEntry,
@@ -219,10 +225,12 @@ describe('UpsellSlider', () => {
 
             await userEvent.click(prevButton);
 
-            expect(scrollToSpy).toHaveBeenCalledWith({
-                behavior: 'smooth',
-                left: -600,
-                top: 0,
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: -600,
+                    top: 0,
+                });
             });
         });
 
@@ -257,7 +265,7 @@ describe('UpsellSlider', () => {
                 const [intersections, prevButtonHidden, nextButtonHidden] = testCase;
 
                 // eslint-disable-next-line @typescript-eslint/no-loop-func
-                await act(() => {
+                act(() => {
                     intersectionCallback([
                         { intersectionRatio: intersections[0], target: slides[0] } as unknown as IntersectionObserverEntry,
                         { intersectionRatio: intersections[1], target: slides[1] } as unknown as IntersectionObserverEntry,
@@ -269,6 +277,54 @@ describe('UpsellSlider', () => {
                 expect(prevButton).toHaveAttribute('aria-hidden', String(prevButtonHidden));
                 expect(nextButton).toHaveAttribute('aria-hidden', String(nextButtonHidden));
             }
+        });
+    });
+
+    describe('scrollToSlide', () => {
+        it('scrolls to the next slide', async () => {
+            const ref = React.createRef<API>();
+            render(<Slider ref={ref}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+            </Slider>);
+
+            const slides = screen.getAllByRole('listitem');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 500 });
+                Object.defineProperty(child, 'offsetLeft', { value: 500 * (i + 1) });
+            });
+
+            act(() => {
+                if (ref.current !== null) {
+                    ref.current.scrollToSlide(2, 'smooth');
+                }
+            });
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: 1500,
+                    top: 0,
+                });
+            });
+        });
+    });
+
+    describe('initialSlideIndex', () => {
+        it('Opens the slider with the initialSlide', async () => {
+            render(<Slider initialSlideIndex={2}>
+                <span key={ 1 } data-testid="child-1"/>
+                <span key={ 2 } data-testid="child-2"/>
+                <span key={ 3 } data-testid="child-3"/>
+                <span key={ 4 } data-testid="child-4"/>
+            </Slider>);
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledTimes(1);
+            });
         });
     });
 });

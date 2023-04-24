@@ -44,6 +44,7 @@
     "@types/react": "^18.0.28",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
+    "@typescript/lib-dom": "npm:@types/web@^0.0.99",
     "babel-jest": "^29.5.0",
     "eslint": "^8.36.0",
     "eslint-config-airbnb": "^19.0.4",

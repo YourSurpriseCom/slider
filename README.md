@@ -63,3 +63,4 @@ export default function YourComponent() {
 | Option                | Type      | Required | Default | Description                         |   
 |-----------------------|-----------|----------|---------|-------------------------------------|
 | hideNavigationButtons | `boolean` | `false`  | `false` | Always hides the navigation buttons |
+| initialSlideIndex     | `number`  | `false`  | `0`     | Open the Slider at a specific index |
