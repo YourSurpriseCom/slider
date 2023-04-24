@@ -147,7 +147,7 @@ describe('UpsellSlider', () => {
             await userEvent.click(screen.getByTestId('1'));
 
             await waitFor(() => {
-                expect(clickSpy).toHaveBeenCalled();
+                expect(clickSpy).toHaveBeenCalledTimes(1);
             });
         });
     });
@@ -323,7 +323,7 @@ describe('UpsellSlider', () => {
             </Slider>);
 
             await waitFor(() => {
-                expect(scrollToSpy).toHaveBeenCalled();
+                expect(scrollToSpy).toHaveBeenCalledTimes(1);
             });
         });
     });
