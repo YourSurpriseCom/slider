@@ -157,7 +157,7 @@ describe('UpsellSlider', () => {
             await userEvent.click(screen.getByTestId('1'));
 
             await waitFor(() => {
-                expect(clickSpy).toHaveBeenCalled();
+                expect(clickSpy).toHaveBeenCalledTimes(1);
             });
         });
     });
@@ -365,6 +365,54 @@ describe('UpsellSlider', () => {
 
             expect(ref.current!.getFirstFullyVisibleSlideIndex()).toBe(0);
             expect(ref.current!.getLastFullyVisibleSlideIndex()).toBe(2);
+        });
+    });
+
+    describe('scrollToSlide', () => {
+        it('scrolls to the next slide', async () => {
+            const ref = React.createRef<API>();
+            render(<Slider ref={ref}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+            </Slider>);
+
+            const slides = screen.getAllByRole('listitem');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 500 });
+                Object.defineProperty(child, 'offsetLeft', { value: 500 * (i + 1) });
+            });
+
+            act(() => {
+                if (ref.current !== null) {
+                    ref.current.scrollToSlide(2, 'smooth');
+                }
+            });
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: 1500,
+                    top: 0,
+                });
+            });
+        });
+    });
+
+    describe('initialSlideIndex', () => {
+        it('Opens the slider with the initialSlide', async () => {
+            render(<Slider initialSlideIndex={2}>
+                <span key={ 1 } data-testid="child-1"/>
+                <span key={ 2 } data-testid="child-2"/>
+                <span key={ 3 } data-testid="child-3"/>
+                <span key={ 4 } data-testid="child-4"/>
+            </Slider>);
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledTimes(1);
+            });
         });
     });
 });
