@@ -1,9 +1,9 @@
 import type { FC, ComponentType } from 'react';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Slider } from '../src';
 import type { SliderTypes } from '../src';
 
-const OnSlideExample: FC<typeof Slider extends ComponentType<infer T> ? Omit<T, 'children'> : never> = (sliderProps) => {
+const OnSlide: FC<typeof Slider extends ComponentType<infer T> ? Omit<T, 'children'> : never> = (sliderProps) => {
     const sliderApi = useRef<SliderTypes.API>(null);
     const [firstVisibleSlideIndex, setFirstVisibleSlideIndex] = useState<number>(0);
     const [lastVisibleSlideIndex, setLastVisibleSlideIndex] = useState<number>(0);
@@ -28,9 +28,10 @@ const OnSlideExample: FC<typeof Slider extends ComponentType<infer T> ? Omit<T, 
 
     return (
         <>
-            <h1>Slides visibility</h1>
+            <h3>Slides visibility</h3>
             <div>First fully visible slide: {firstVisibleSlideIndex + 1}</div>
             <div>Last fully visible slide: {lastVisibleSlideIndex + 1}</div>
+            <br/>
             <Slider {...sliderProps} onSlide={onSlide} ref={sliderApi}>
                 {slides}
             </Slider>
@@ -38,4 +39,4 @@ const OnSlideExample: FC<typeof Slider extends ComponentType<infer T> ? Omit<T, 
     );
 };
 
-export default OnSlideExample;
+export default OnSlide;

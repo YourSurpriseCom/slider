@@ -1,9 +1,9 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { Slider, SliderTypes } from './Slider';
+import { Slider } from './Slider';
+import type { SliderTypes } from './Slider';
 import React from 'react';
-import API = SliderTypes.API;
 
 const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scrollLeft = 0) => {
     Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: clientWidth });
@@ -22,7 +22,7 @@ const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scro
     </Slider>);
 };
 
-describe('UpsellSlider', () => {
+describe('Slider', () => {
     let mockIntersectionObserver: jest.Mock<IntersectionObserver, ConstructorParameters<typeof IntersectionObserver>>;
     let observeSpy: jest.Mock;
     let disconnectSpy: jest.Mock;
@@ -275,7 +275,7 @@ describe('UpsellSlider', () => {
 
     describe('scrollToSlide', () => {
         it('scrolls to the next slide', async () => {
-            const ref = React.createRef<API>();
+            const ref = React.createRef<SliderTypes.API>();
             render(<Slider ref={ref}>
                 <span key={1}/>
                 <span key={2}/>
@@ -341,7 +341,7 @@ describe('UpsellSlider', () => {
 
     describe('visible slide indexes', () => {
         it('retrieves the first and last fully visible slide indices', () => {
-            const ref = React.createRef<API>();
+            const ref = React.createRef<SliderTypes.API>();
             render(<Slider ref={ref}>
                 <span key={1}/>
                 <span key={2}/>
@@ -370,7 +370,7 @@ describe('UpsellSlider', () => {
 
     describe('scrollToSlide', () => {
         it('scrolls to the next slide', async () => {
-            const ref = React.createRef<API>();
+            const ref = React.createRef<SliderTypes.API>();
             render(<Slider ref={ref}>
                 <span key={1}/>
                 <span key={2}/>
