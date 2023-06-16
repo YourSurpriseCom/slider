@@ -7,6 +7,7 @@ import InitialSlide from './examples/InitialSlide';
 import LazyLoaded from './examples/LazyLoaded';
 import ScrollToSlide from './examples/ScrollToSlide';
 import HideNavigation from './examples/HideNavigation';
+import Vertical from './examples/Vertical';
 import './Index.scss';
 
 const Index: React.FC = () => (
@@ -24,6 +25,7 @@ const Index: React.FC = () => (
         </section>
         <section>
             <h1>Configuration</h1>
+            <Vertical/>
             <HideNavigation/>
         </section>
         <section>

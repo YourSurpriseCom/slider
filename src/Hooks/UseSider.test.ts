@@ -87,17 +87,23 @@ describe('UseSlider', () => {
     });
 
     describe('calculations', () => {
+        it('calculates whether to block a click when sliding', () => {
+            const { result } = renderHook(() => useSlider());
+
+            expect(result.current.shouldBlockClicks(5)).toBe(false);
+            expect(result.current.shouldBlockClicks(6)).toBe(true);
+        });
 
         it('calculates the scrollLeft position (next)', () => {
             const { result } = renderHook(() => useSlider());
 
-            expect(result.current.getLeftPositionToScrollTo(NavigationDirection.NEXT, 200, 50, 1250, 325)).toBe(150);
+            expect(result.current.getPositionToScrollTo(NavigationDirection.NEXT, 200, 50, 1250, 325)).toBe(150);
         });
 
         it('calculates the scrollLeft position (prev)', () => {
             const { result } = renderHook(() => useSlider());
 
-            expect(result.current.getLeftPositionToScrollTo(NavigationDirection.PREV, 875, 50, 1250, 325)).toBe(-100);
+            expect(result.current.getPositionToScrollTo(NavigationDirection.PREV, 875, 50, 1250, 325)).toBe(-100);
         });
 
         it('calculates the visibility of a slide', () => {

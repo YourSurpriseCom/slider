@@ -62,11 +62,12 @@ export default function YourComponent() {
 
 ### Configuration
 
-| Option                | Type       | Required | Default     | Description                                             |   
-|-----------------------|------------|----------|-------------|---------------------------------------------------------|
-| hideNavigationButtons | `boolean`  | `false`  | `false`     | Always hides the navigation buttons                     |
-| initialSlideIndex     | `number`   | `false`  | `0`         | Open the Slider at a specific index                     |
-| onSlide               | `function` | `false`  | `undefined` | A callback function that is called when the user slides |
+| Option                | Type       | Required | Default      | Description                                             |   
+|-----------------------|------------|----------|--------------|---------------------------------------------------------|
+| hideNavigationButtons | `boolean`  | `false`  | `false`      | Always hides the navigation buttons                     |
+| initialSlideIndex     | `number`   | `false`  | `0`          | Open the Slider at a specific index                     |
+| onSlide               | `function` | `false`  | `undefined`  | A callback function that is called when the user slides |
+| direction             | `string`   | `false`  | `horizontal` | Direction of the slider: 'horizontal' or 'vertical'     |
 
 ### API
 

@@ -2,9 +2,8 @@
   position: relative;
 
   &__wrapper {
-
-    // Prevent the browser from going back in history when there is no scroll area left
-    overscroll-behavior-x: contain;
+    display: flex;
+    scroll-behavior: smooth;
 
     // Hide the scrollbars
     -ms-overflow-style: none; // for Internet Explorer, Edge
@@ -14,33 +13,43 @@
       display: none; // for Chrome, Safari, and Opera
     }
 
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
+    &--is-scrollable {
+      cursor: move;
+    }
 
-    scroll-snap-type: x proximity;
+    &--is-horizontal {
+      // Prevent the browser from going back in history when there is no scroll area left
+      overscroll-behavior-x: contain;
+      flex-direction: row;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+    }
+
+    &--is-vertical {
+      // Prevent the browser from going back in history when there is no scroll area left
+      overscroll-behavior-y: contain;
+      scroll-snap-type: y proximity;
+      flex-direction: column;
+      overflow-y: auto;
+    }
 
     // Disable scroll snapping when we assume there's a mouse
     @media (hover: hover) {
       scroll-snap-type: initial;
     }
 
-    // Enable smooth scroll, but only when not dragging the slider with a mouse
-    &:not(.is-dragging) {
-      scroll-behavior: smooth;
+    &--is-dragging {
+      scroll-behavior: initial;
     }
 
-    &.is-scrollable {
-      cursor: move;
-    }
-
-    &.is-dragging {
+    &--is-dragging {
       cursor: grabbing;
       user-select: none;
     }
 
     &__slide {
       scroll-snap-align: start;
+      white-space: nowrap;
     }
   }
 }
