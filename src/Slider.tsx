@@ -58,13 +58,13 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
     const [mousePosition, setMousePosition] = useState<{
         clientX: number;
+        clientY: number
         scrollX: number;
         scrollY: number;
-        clientY: number
     }>({
         clientX: 0,
-        scrollX: 0,
         clientY: 0,
+        scrollX: 0,
         scrollY: 0,
     });
 

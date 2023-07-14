@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import type { SliderTypes } from './Slider';
 import { Orientation, Slider } from './Slider';
-import React from 'react';
+import React, { ComponentType } from 'react';
+
+type SliderOptions = typeof Slider extends ComponentType<infer T> ? Omit<T, 'children'> : never;
 
 const renderSliderWithDimensions = ({
     clientWidth = 1000,
@@ -12,7 +14,7 @@ const renderSliderWithDimensions = ({
     scrollTop = 0,
     scrollHeight = 2000,
     clientHeight = 1000,
-}, sliderOptions = {}) => {
+}, sliderOptions: SliderOptions = {}) => {
     Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: clientWidth });
     Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: scrollWidth });
     Object.defineProperty(HTMLElement.prototype, 'scrollHeight', { configurable: true, value: scrollHeight });
@@ -86,16 +88,53 @@ describe('Slider', () => {
         expect(observeSpy).toHaveBeenCalledTimes(children.length);
     });
 
+    it('does not set the container scrollable if the scroll area does not exceed the container width', () => {
+        renderSliderWithDimensions({
+            clientWidth: 200,
+            scrollWidth: 200,
+            clientHeight: 200,
+            scrollHeight: 200,
+        });
+
+        expect(screen.getByRole('list')).not.toHaveClass('slider__wrapper--is-scrollable');
+    });
+
+    it('does not set the container scrollable if the scroll area does not exceed the container height', () => {
+        renderSliderWithDimensions({
+            clientWidth: 200,
+            scrollWidth: 200,
+            clientHeight: 200,
+            scrollHeight: 200,
+        }, {
+            orientation: Orientation.VERTICAL,
+        });
+
+
+        expect(screen.getByRole('list')).not.toHaveClass('slider__wrapper--is-scrollable');
+    });
+
     it('sets the container scrollable if the scroll area exceeds the container width', () => {
-        renderSliderWithDimensions({ clientWidth: 500, scrollWidth: 1000 });
+        renderSliderWithDimensions({
+            clientWidth: 500,
+            scrollWidth: 1000,
+            clientHeight: 200,
+            scrollHeight: 200,
+        });
 
         expect(screen.getByRole('list')).toHaveClass('slider__wrapper--is-scrollable');
     });
 
-    it('does not set the container scrollable if the scroll area does not exceed the container width', () => {
-        renderSliderWithDimensions({ clientWidth: 500, scrollWidth: 400 });
+    it('sets the container scrollable if the scroll area exceeds the container height', () => {
+        renderSliderWithDimensions({
+            clientWidth: 200,
+            scrollWidth: 200,
+            clientHeight: 500,
+            scrollHeight: 1000,
+        }, {
+            orientation: Orientation.VERTICAL,
+        });
 
-        expect(screen.getByRole('list')).not.toHaveClass('slider__wrapper--is-scrollable');
+        expect(screen.getByRole('list')).toHaveClass('slider__wrapper--is-scrollable');
     });
 
     it('disconnects the intersection observer on re-render', () => {
