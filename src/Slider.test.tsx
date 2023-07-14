@@ -430,6 +430,36 @@ describe('Slider', () => {
             });
         });
 
+        it('scrolls to a specific slide', async () => {
+            const ref = React.createRef<SliderTypes.API>();
+            render(<Slider ref={ref}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+            </Slider>);
+
+            const slides = screen.getAllByRole('listitem');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 500 });
+                Object.defineProperty(child, 'offsetLeft', { value: 500 * (i + 1) });
+            });
+
+            act(() => {
+                if (ref.current !== null) {
+                    ref.current.scrollToSlide(2, 'smooth');
+                }
+            });
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: 1500,
+                });
+            });
+        });
+
         it('scrolls to a specific slide vertically', async () => {
             const ref = React.createRef<SliderTypes.API>();
             render(<Slider ref={ref} orientation={Orientation.VERTICAL}>
