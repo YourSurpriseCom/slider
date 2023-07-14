@@ -32,11 +32,39 @@
     display: none;
   }
 
-  &--next {
-    right: 5px;
+  &__next {
+    &--horizontal {
+      right: 5px;
+    }
+
+    &--vertical {
+      margin: 0 auto;
+      bottom: 5px;
+      left: 0;
+      right: 0;
+      top: initial;
+
+      svg {
+        transform: rotate(90deg);
+      }
+    }
   }
 
-  &--prev {
-    left: 5px;
+  &__prev {
+    &--horizontal {
+      left: 5px;
+    }
+
+    &--vertical {
+      margin: 0 auto;
+      top: 5px;
+      bottom: initial;
+      left: 0;
+      right: 0;
+
+      svg {
+        transform: rotate(90deg);
+      }
+    }
   }
 }

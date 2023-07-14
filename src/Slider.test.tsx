@@ -1,20 +1,36 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { Slider } from './Slider';
 import type { SliderTypes } from './Slider';
-import React from 'react';
+import { Orientation, Slider } from './Slider';
+import React, { ComponentType } from 'react';
 
-const renderSliderWithDimensions = (clientWidth = 1000, scrollWidth = 2000, scrollLeft = 0) => {
+type SliderOptions = typeof Slider extends ComponentType<infer T> ? Omit<T, 'children'> : never;
+
+const renderSliderWithDimensions = ({
+    clientWidth = 1000,
+    scrollWidth = 2000,
+    scrollLeft = 0,
+    scrollTop = 0,
+    scrollHeight = 2000,
+    clientHeight = 1000,
+}, sliderOptions: SliderOptions = {}) => {
     Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: clientWidth });
     Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: scrollWidth });
+    Object.defineProperty(HTMLElement.prototype, 'scrollHeight', { configurable: true, value: scrollHeight });
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', { configurable: true, value: clientHeight });
     Object.defineProperty(HTMLElement.prototype, 'scrollLeft', {
         configurable: true,
         value: scrollLeft,
         writable: true,
     });
+    Object.defineProperty(HTMLElement.prototype, 'scrollTop', {
+        configurable: true,
+        value: scrollTop,
+        writable: true,
+    });
 
-    render(<Slider>
+    render(<Slider {...sliderOptions}>
         <span key={1}/>
         <span key={2}/>
         <span key={3}/>
@@ -72,16 +88,53 @@ describe('Slider', () => {
         expect(observeSpy).toHaveBeenCalledTimes(children.length);
     });
 
-    it('sets the container scrollable if the scroll area exceeds the container width', () => {
-        renderSliderWithDimensions(500, 1000);
+    it('does not set the container scrollable if the scroll area does not exceed the container width', () => {
+        renderSliderWithDimensions({
+            clientWidth: 200,
+            scrollWidth: 200,
+            clientHeight: 200,
+            scrollHeight: 200,
+        });
 
-        expect(screen.getByRole('list')).toHaveClass('is-scrollable');
+        expect(screen.getByRole('list')).not.toHaveClass('slider__wrapper--is-scrollable');
     });
 
-    it('does not set the container scrollable if the scroll area does not exceed the container width', () => {
-        renderSliderWithDimensions(500, 400);
+    it('does not set the container scrollable if the scroll area does not exceed the container height', () => {
+        renderSliderWithDimensions({
+            clientWidth: 200,
+            scrollWidth: 200,
+            clientHeight: 200,
+            scrollHeight: 200,
+        }, {
+            orientation: Orientation.VERTICAL,
+        });
 
-        expect(screen.getByRole('list')).not.toHaveClass('is-scrollable');
+
+        expect(screen.getByRole('list')).not.toHaveClass('slider__wrapper--is-scrollable');
+    });
+
+    it('sets the container scrollable if the scroll area exceeds the container width', () => {
+        renderSliderWithDimensions({
+            clientWidth: 500,
+            scrollWidth: 1000,
+            clientHeight: 200,
+            scrollHeight: 200,
+        });
+
+        expect(screen.getByRole('list')).toHaveClass('slider__wrapper--is-scrollable');
+    });
+
+    it('sets the container scrollable if the scroll area exceeds the container height', () => {
+        renderSliderWithDimensions({
+            clientWidth: 200,
+            scrollWidth: 200,
+            clientHeight: 500,
+            scrollHeight: 1000,
+        }, {
+            orientation: Orientation.VERTICAL,
+        });
+
+        expect(screen.getByRole('list')).toHaveClass('slider__wrapper--is-scrollable');
     });
 
     it('disconnects the intersection observer on re-render', () => {
@@ -96,7 +149,7 @@ describe('Slider', () => {
 
     describe('controls', () => {
         it('sets controls visibility initially', () => {
-            renderSliderWithDimensions();
+            renderSliderWithDimensions({});
 
             const nextButton = screen.getByLabelText('Next slide');
             const prevButton = screen.getByLabelText('Previous slide');
@@ -121,18 +174,29 @@ describe('Slider', () => {
         });
 
         it('allows scrolling by dragging with the mouse', () => {
-            renderSliderWithDimensions();
+            renderSliderWithDimensions({});
 
             const scrollElement = screen.getByRole('list');
 
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseDown(scrollElement);
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseUp(scrollElement);
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 }));
+            act(() => fireEvent.mouseUp(scrollElement));
 
             expect(scrollElement.scrollLeft).toBe(-100);
+            expect(scrollElement.scrollTop).toBe(0);
+        });
+
+        it('allows vertical scrolling by dragging with the mouse', () => {
+            renderSliderWithDimensions({}, { orientation: Orientation.VERTICAL });
+
+            const scrollElement = screen.getByRole('list');
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 0, clientY: 100 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            expect(scrollElement.scrollTop).toBe(-100);
+            expect(scrollElement.scrollLeft).toBe(0);
         });
 
         it('registers click when not scrolling', async () => {
@@ -144,17 +208,15 @@ describe('Slider', () => {
 
             const scrollElement = screen.getByRole('list');
 
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseDown(scrollElement);
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 });
-            // eslint-disable-next-line testing-library/prefer-user-event
-            fireEvent.mouseUp(scrollElement);
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 100, clientY: 0 }));
+            act(() => fireEvent.mouseUp(scrollElement));
 
-            // This click is normally triggered when releasing the mouse after scrolling
-            await userEvent.click(scrollElement);
-
-            await userEvent.click(screen.getByTestId('1'));
+            await act(async () => {
+                // This click is normally triggered when releasing the mouse after scrolling
+                await userEvent.click(scrollElement);
+                await userEvent.click(screen.getByTestId('1'));
+            });
 
             await waitFor(() => {
                 expect(clickSpy).toHaveBeenCalledTimes(1);
@@ -164,7 +226,7 @@ describe('Slider', () => {
 
     describe('sliding', () => {
         it('scrolls to the next slide', async () => {
-            renderSliderWithDimensions();
+            renderSliderWithDimensions({});
 
             const intersectionObserverInstance = getIntersectionObserverInstance();
             const [intersectionCallback] = intersectionObserverInstance;
@@ -192,13 +254,45 @@ describe('Slider', () => {
                 expect(scrollToSpy).toHaveBeenCalledWith({
                     behavior: 'smooth',
                     left: 200,
-                    top: 0,
+                });
+            });
+        });
+
+        it('scrolls to the next slide vertically', async () => {
+            renderSliderWithDimensions({}, { orientation: Orientation.VERTICAL });
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+
+            const slides = screen.getAllByRole('listitem');
+            const nextButton = screen.getByLabelText('Next slide');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientHeight', { value: 100 * (i + 1) });
+                Object.defineProperty(child, 'offsetTop', { value: 100 * (i + 1) });
+            });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[0] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0.5, target: slides[1] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[2] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[3] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            await userEvent.click(nextButton);
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    top: 200,
                 });
             });
         });
 
         it('scrolls to the previous slide', async () => {
-            renderSliderWithDimensions();
+            renderSliderWithDimensions({});
 
             const intersectionObserverInstance = getIntersectionObserverInstance();
             const [intersectionCallback] = intersectionObserverInstance;
@@ -226,7 +320,39 @@ describe('Slider', () => {
                 expect(scrollToSpy).toHaveBeenCalledWith({
                     behavior: 'smooth',
                     left: -600,
-                    top: 0,
+                });
+            });
+        });
+
+        it('scrolls to the previous slide vertically', async () => {
+            renderSliderWithDimensions({}, { orientation: Orientation.VERTICAL });
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+
+            const slides = screen.getAllByRole('listitem');
+            const prevButton = screen.getByLabelText('Previous slide');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientHeight', { value: 100 * (i + 1) });
+                Object.defineProperty(child, 'offsetTop', { value: 100 * (i + 1) });
+            });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 0, target: slides[0] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0, target: slides[1] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 1, target: slides[2] } as unknown as IntersectionObserverEntry,
+                    { intersectionRatio: 0.5, target: slides[3] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            await userEvent.click(prevButton);
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    top: -600,
                 });
             });
         });
@@ -274,7 +400,7 @@ describe('Slider', () => {
     });
 
     describe('scrollToSlide', () => {
-        it('scrolls to the next slide', async () => {
+        it('scrolls to a specific slide', async () => {
             const ref = React.createRef<SliderTypes.API>();
             render(<Slider ref={ref}>
                 <span key={1}/>
@@ -300,11 +426,71 @@ describe('Slider', () => {
                 expect(scrollToSpy).toHaveBeenCalledWith({
                     behavior: 'smooth',
                     left: 1500,
-                    top: 0,
+                });
+            });
+        });
+
+        it('scrolls to a specific slide', async () => {
+            const ref = React.createRef<SliderTypes.API>();
+            render(<Slider ref={ref}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+            </Slider>);
+
+            const slides = screen.getAllByRole('listitem');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 500 });
+                Object.defineProperty(child, 'offsetLeft', { value: 500 * (i + 1) });
+            });
+
+            act(() => {
+                if (ref.current !== null) {
+                    ref.current.scrollToSlide(2, 'smooth');
+                }
+            });
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    left: 1500,
+                });
+            });
+        });
+
+        it('scrolls to a specific slide vertically', async () => {
+            const ref = React.createRef<SliderTypes.API>();
+            render(<Slider ref={ref} orientation={Orientation.VERTICAL}>
+                <span key={1}/>
+                <span key={2}/>
+                <span key={3}/>
+                <span key={4}/>
+            </Slider>);
+
+            const slides = screen.getAllByRole('listitem');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientHeight', { configurable: true, value: 500 });
+                Object.defineProperty(child, 'offsetTop', { value: 500 * (i + 1) });
+            });
+
+            act(() => {
+                if (ref.current !== null) {
+                    ref.current.scrollToSlide(2, 'smooth');
+                }
+            });
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({
+                    behavior: 'smooth',
+                    top: 1500,
                 });
             });
         });
     });
+
 
     describe('initialSlideIndex', () => {
         it('Opens the slider with the initialSlide', async () => {
@@ -367,52 +553,5 @@ describe('Slider', () => {
             expect(ref.current!.getLastFullyVisibleSlideIndex()).toBe(2);
         });
     });
-
-    describe('scrollToSlide', () => {
-        it('scrolls to the next slide', async () => {
-            const ref = React.createRef<SliderTypes.API>();
-            render(<Slider ref={ref}>
-                <span key={1}/>
-                <span key={2}/>
-                <span key={3}/>
-                <span key={4}/>
-            </Slider>);
-
-            const slides = screen.getAllByRole('listitem');
-
-            slides.forEach((child, i) => {
-                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 500 });
-                Object.defineProperty(child, 'offsetLeft', { value: 500 * (i + 1) });
-            });
-
-            act(() => {
-                if (ref.current !== null) {
-                    ref.current.scrollToSlide(2, 'smooth');
-                }
-            });
-
-            await waitFor(() => {
-                expect(scrollToSpy).toHaveBeenCalledWith({
-                    behavior: 'smooth',
-                    left: 1500,
-                    top: 0,
-                });
-            });
-        });
-    });
-
-    describe('initialSlideIndex', () => {
-        it('Opens the slider with the initialSlide', async () => {
-            render(<Slider initialSlideIndex={2}>
-                <span key={ 1 } data-testid="child-1"/>
-                <span key={ 2 } data-testid="child-2"/>
-                <span key={ 3 } data-testid="child-3"/>
-                <span key={ 4 } data-testid="child-4"/>
-            </Slider>);
-
-            await waitFor(() => {
-                expect(scrollToSpy).toHaveBeenCalledTimes(1);
-            });
-        });
-    });
 });
+

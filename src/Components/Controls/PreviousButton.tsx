@@ -1,13 +1,15 @@
 import classNames from 'classnames';
 import React from 'react';
+import { Orientation } from '../../Slider';
 import './Button.scss';
 
 interface Props {
     onClick: () => void;
     isHidden: boolean;
+    direction: Orientation;
 }
 
-export const PreviousButton: React.FC<Props> = ({ onClick, isHidden }) => {
+export const PreviousButton: React.FC<Props> = ({ onClick, isHidden, direction }) => {
     return (
         <button
             aria-label="Previous slide"
@@ -16,8 +18,12 @@ export const PreviousButton: React.FC<Props> = ({ onClick, isHidden }) => {
             aria-hidden={isHidden}
             className={classNames([
                 'slider__button',
-                'slider__button--prev',
-                { 'slider__button--hidden': isHidden },
+                'slider__button__prev',
+                {
+                    'slider__button--hidden': isHidden,
+                    'slider__button__prev--horizontal': direction === Orientation.HORIZONTAL,
+                    'slider__button__prev--vertical': direction === Orientation.VERTICAL,
+                },
             ])}
         >
             <svg className="slider__button__icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 256 256">

@@ -12,7 +12,7 @@ export enum NavigationDirection {
 }
 
 interface UseSlider {
-    getLeftPositionToScrollTo: (direction: NavigationDirection, slideOffsetLeft: number, wrapperOffsetLeft: number, wrapperWidth: number, slideWidth: number) => number;
+    getPositionToScrollTo: (direction: NavigationDirection, slideOffset: number, wrapperOffset: number, wrapperDimension: number, slideDimension: number) => number;
     getVisibilityByIntersectionRatio: (intersectionRatio: number) => Visibility;
     getFirstVisibleSlideIndex: () => number;
     getLastVisibleSlideIndex: () => number;
@@ -21,6 +21,7 @@ interface UseSlider {
     sortSlides: () => void;
     removeVisibleSlide: (index: number) => void;
     removePartiallyVisibleSlide: (index: number) => void;
+    shouldBlockClicks: (delta: number) => boolean;
 }
 
 export const useSlider = (): UseSlider => {
@@ -46,16 +47,20 @@ export const useSlider = (): UseSlider => {
         partiallyVisibleSlideIndices.current = [...new Set(partiallyVisibleSlideIndices.current)].sort((a, b) => a - b);
     };
 
-    const getLeftPositionToScrollTo = (direction: NavigationDirection, slideOffsetLeft: number, wrapperOffsetLeft: number, wrapperWidth: number, slideWidth: number) => {
-        let scrollLeft = 0;
+    const shouldBlockClicks = (delta: number) => {
+        return Math.abs(delta) > 5;
+    };
+
+    const getPositionToScrollTo = (direction: NavigationDirection, slideOffset: number, wrapperOffset: number, wrapperDimension: number, slideDimension: number) => {
+        let scroll = 0;
 
         if (direction === NavigationDirection.PREV) {
-            scrollLeft = slideOffsetLeft - wrapperOffsetLeft - wrapperWidth + slideWidth;
+            scroll = slideOffset - wrapperOffset - wrapperDimension + slideDimension;
         } else {
-            scrollLeft = slideOffsetLeft - wrapperOffsetLeft;
+            scroll = slideOffset - wrapperOffset;
         }
 
-        return scrollLeft;
+        return scroll;
     };
 
     const getVisibilityByIntersectionRatio =  (intersectionRatio: number) => {
@@ -78,7 +83,8 @@ export const useSlider = (): UseSlider => {
         sortSlides,
         getFirstVisibleSlideIndex,
         getLastVisibleSlideIndex,
-        getLeftPositionToScrollTo,
+        getPositionToScrollTo,
         getVisibilityByIntersectionRatio,
+        shouldBlockClicks,
     };
 };
