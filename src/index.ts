@@ -1,5 +1,5 @@
-import { Slider } from './Slider';
+import { Slider, Orientation } from './Slider';
 import type { SliderTypes } from './Slider';
 
-export { Slider };
+export { Slider, Orientation };
 export type { SliderTypes };
