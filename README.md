@@ -1,4 +1,5 @@
 # React slider
+**Also known as: Swooper**
 
 This package contains a basic modern slider. The purpose of this slider is to provide a simple React component
 which can be controlled in a userfriendly way on mobile, tablet and desktop.
