@@ -6,7 +6,7 @@ import './Button.scss';
 interface Props {
     onClick: () => void;
     isHidden: boolean;
-    direction: Orientation;
+    direction: `${Orientation}`;
 }
 
 export const PreviousButton: React.FC<Props> = ({ onClick, isHidden, direction }) => {
