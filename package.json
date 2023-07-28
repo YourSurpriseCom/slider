@@ -13,7 +13,9 @@
     "dist/*"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "jest src/",
+    "e2e-tests": "npx playwright test",
+    "e2e-tests-ui": "npx playwright test --ui",
     "lint": "eslint src/",
     "build": "rm -rf ./dist && rollup -c --bundleConfigAsCjs",
     "tsc": "tsc -p tsconfig-check.json",
@@ -34,6 +36,7 @@
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.21.0",
     "@parcel/transformer-sass": "^2.8.3",
+    "@playwright/test": "^1.36.2",
     "@rollup/plugin-commonjs": "^25.0.3",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^11.1.2",
