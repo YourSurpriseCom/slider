@@ -9,7 +9,7 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
     retries: 0,
     workers: process.env.CI ? 1 : undefined,
-    reporter: 'line',
+    reporter: 'html',
     use: {
         trace: 'on-first-retry',
     },

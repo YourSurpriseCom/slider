@@ -69,3 +69,27 @@ test('can navigate with the buttons', async ({ page }) => {
 
     await expect(firstSlide).toBeInViewport();
 });
+
+test('toggles the navigation buttons', async ({ page }) => {
+    await page.goto('http://localhost:1234/');
+
+    const firstSlider = await page.locator('.slider').first();
+
+    const nextSlideButton = await firstSlider.getByLabel('Next slide').first();
+    const prevSlideButton = await firstSlider.getByLabel('Previous slide').first();
+
+    await expect(prevSlideButton).not.toBeVisible();
+    await expect(nextSlideButton).toBeVisible();
+
+    await nextSlideButton.click();
+
+    await expect(prevSlideButton).toBeVisible();
+    await expect(nextSlideButton).toBeVisible();
+
+    await nextSlideButton.click();
+
+    await nextSlideButton.click();
+
+    await expect(prevSlideButton).toBeVisible();
+    await expect(nextSlideButton).not.toBeVisible();
+});
