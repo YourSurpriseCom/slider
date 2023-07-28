@@ -20,6 +20,8 @@ module.exports = {
                 devDependencies: [
                     './Index.tsx',
                     '**/*.test.*',
+                    '**/test/*.spec.*',
+                    '**/playwright.config.ts*',
                     '**/rollup.config.js*',
                     '**/babel.config.cjs*',
                     '**/jest.config.js*',

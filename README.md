@@ -15,7 +15,7 @@ This slider has the following features:
 
 Todos (help appreciated):
 
-- Add end-to-end tests
+- Expand end-to-end test suite
 - Improve accessibility
 - Reduce amount of required tooling
 
