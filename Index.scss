@@ -64,3 +64,28 @@ body {
     height: 200px;
   }
 }
+
+.single-slide {
+
+  .slider {
+
+    &__wrapper {
+      scroll-snap-type: x mandatory;
+      height: 300px;
+
+      &--is-dragging {
+        scroll-snap-type: initial;
+      }
+
+      &__slide {
+       scroll-snap-align: center;
+       display: flex;
+       flex: 1 0 100%;
+
+        .demo-slide {
+          margin: 0;
+        }
+     }
+    }
+  }
+}

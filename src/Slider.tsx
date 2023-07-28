@@ -31,7 +31,7 @@ interface Settings {
     hideNavigationButtons?: boolean;
     initialSlideIndex?: number;
     onSlide?: () => void;
-    orientation?: Orientation,
+    orientation?: `${Orientation}`,
 }
 
 interface SlideVisibilityEntry {

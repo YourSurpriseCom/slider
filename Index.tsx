@@ -8,6 +8,7 @@ import LazyLoaded from './examples/LazyLoaded';
 import ScrollToSlide from './examples/ScrollToSlide';
 import HideNavigation from './examples/HideNavigation';
 import Vertical from './examples/Vertical';
+import SingleSlide from './examples/SingleSlide';
 import './Index.scss';
 
 const Index: React.FC = () => (
@@ -18,6 +19,7 @@ const Index: React.FC = () => (
             <h1>Dimensions</h1>
             <FixedWidth/>
             <VaryingWidth/>
+            <SingleSlide/>
         </section>
         <section>
             <h1>Images</h1>
