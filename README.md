@@ -1,7 +1,7 @@
 # React slider
 **Also known as: Swooper**
 
-This package contains a basic modern slider. The purpose of this slider is to provide a simple React component
+This package contains a basic modern slider (±2.5kb gzipped). The purpose of this slider is to provide a simple React component
 which can be controlled in a userfriendly way on mobile, tablet and desktop.
 
 Demo page: https://yoursurprisecom.github.io/slider/
@@ -15,17 +15,11 @@ This slider has the following features:
 
 Todos (help appreciated):
 
-- ~~Add a demo page~~
-- Add more configuration
 - Add end-to-end tests
-- ~~Set up proper workflows in GitHub~~
-- ~~Set the GitHub repository to public~~
-- Support more browsers
 - Improve accessibility
 - Reduce amount of required tooling
 
-All browsers with [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
-will be supported, as of right now, only the latest versions of browsers are supported.
+All browsers with support for [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) and [scroll-snap](https://caniuse.com/css-snappoints) are supported. 
 
 ## Installation
 
