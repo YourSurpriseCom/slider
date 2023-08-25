@@ -2,7 +2,9 @@
 **Also known as: Swooper**
 
 This package contains a basic modern slider (±2.5kb gzipped). The purpose of this slider is to provide a simple React component
-which can be controlled in a userfriendly way on mobile, tablet and desktop.
+which can be controlled in a userfriendly way on mobile, tablet and desktop. 
+
+The aim is to keep the slider as basic as possible, while exposing an API that allows more advanced implementations to be realised. 
 
 Demo page: https://yoursurprisecom.github.io/slider/
 
@@ -94,3 +96,21 @@ export default function YourComponent() {
     );
 }
 ```
+
+## Development
+
+#### End-to-end tests
+
+Prior to developing or running end-to-end tests, install the browsers in which the tests will run:
+
+`npx playwright install`
+
+Afterwards, the tests can be run using:
+
+`npm run e2e-tests`
+
+Or alternatively the test interface can be opened using:
+
+`npm run e2e-tests-ui`
+
+
