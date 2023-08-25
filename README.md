@@ -73,6 +73,8 @@ export default function YourComponent() {
 | getFirstFullyVisibleSlideIndex | `function` | `number` | Retrieve the first fully visible slide index |
 | getLastFullyVisibleSlideIndex  | `function` | `number` | Retrieve the last fully visible slide index  |
 | scrollToSlide                  | `function` | `void`   | Scroll the slider to a specific slide        |
+| scrollToNextSlide              | `function` | `void`   | Scroll the slider to the next slide          |
+| scrollToPreviousSlide          | `function` | `void`   | Scroll the slider to the previous slide      |
 
 #### Example on how to access the slider API:
 
