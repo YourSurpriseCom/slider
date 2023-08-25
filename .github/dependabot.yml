@@ -4,6 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    reviewers:
+      - "iFiz"
     groups:
       dev-dependencies:
         patterns:
