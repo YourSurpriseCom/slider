@@ -315,10 +315,13 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         onSlide,
     ]);
 
+    const scrollToNextSlide = () => navigate(NavigationDirection.NEXT);
+    const scrollToPreviousSlide = () => navigate(NavigationDirection.PREV);
+
     useImperativeHandle(ref, () => ({
         scrollToSlide: scrollToSlide,
-        scrollToNextSlide: () => navigate(NavigationDirection.NEXT),
-        scrollToPreviousSlide: () => navigate(NavigationDirection.PREV),
+        scrollToNextSlide: scrollToNextSlide,
+        scrollToPreviousSlide: scrollToPreviousSlide,
         getFirstFullyVisibleSlideIndex: getFirstVisibleSlideIndex,
         getLastFullyVisibleSlideIndex: getLastVisibleSlideIndex,
     }));
@@ -345,8 +348,8 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             </div>
             { !hideNavigationButtons && (
                 <>
-                    <PreviousButton onClick={() => navigate(NavigationDirection.PREV)} isHidden={!prevArrowVisible} direction={orientation}/>
-                    <NextButton onClick={() => navigate(NavigationDirection.NEXT)} isHidden={!nextArrowVisible} direction={orientation}/>
+                    <PreviousButton onClick={scrollToPreviousSlide} isHidden={!prevArrowVisible} direction={orientation}/>
+                    <NextButton onClick={scrollToNextSlide} isHidden={!nextArrowVisible} direction={orientation}/>
                 </>
             )}
         </div>
