@@ -18,6 +18,8 @@ import './Slider.scss';
 export namespace SliderTypes {
     export interface API {
         scrollToSlide: (index: number, behaviour: ScrollBehavior) => void;
+        scrollToNextSlide: () => void;
+        scrollToPreviousSlide: () => void;
         getFirstFullyVisibleSlideIndex(): number;
         getLastFullyVisibleSlideIndex(): number;
     }
@@ -313,8 +315,13 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         onSlide,
     ]);
 
+    const scrollToNextSlide = () => navigate(NavigationDirection.NEXT);
+    const scrollToPreviousSlide = () => navigate(NavigationDirection.PREV);
+
     useImperativeHandle(ref, () => ({
         scrollToSlide: scrollToSlide,
+        scrollToNextSlide: scrollToNextSlide,
+        scrollToPreviousSlide: scrollToPreviousSlide,
         getFirstFullyVisibleSlideIndex: getFirstVisibleSlideIndex,
         getLastFullyVisibleSlideIndex: getLastVisibleSlideIndex,
     }));
@@ -341,8 +348,8 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             </div>
             { !hideNavigationButtons && (
                 <>
-                    <PreviousButton onClick={() => navigate(NavigationDirection.PREV)} isHidden={!prevArrowVisible} direction={orientation}/>
-                    <NextButton onClick={() => navigate(NavigationDirection.NEXT)} isHidden={!nextArrowVisible} direction={orientation}/>
+                    <PreviousButton onClick={scrollToPreviousSlide} isHidden={!prevArrowVisible} direction={orientation}/>
+                    <NextButton onClick={scrollToNextSlide} isHidden={!nextArrowVisible} direction={orientation}/>
                 </>
             )}
         </div>
