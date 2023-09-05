@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { MouseEvent as ReactMouseEvent, Ref } from 'react';
 import {
     Children,
     forwardRef,
@@ -22,6 +22,7 @@ export namespace SliderTypes {
         scrollToPreviousSlide: () => void;
         getFirstFullyVisibleSlideIndex(): number;
         getLastFullyVisibleSlideIndex(): number;
+        wrapperRef: Ref<HTMLDivElement>;
     }
 }
 export enum Orientation {
@@ -324,6 +325,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         scrollToPreviousSlide: scrollToPreviousSlide,
         getFirstFullyVisibleSlideIndex: getFirstVisibleSlideIndex,
         getLastFullyVisibleSlideIndex: getLastVisibleSlideIndex,
+        wrapperRef: wrapper,
     }));
 
     return (
