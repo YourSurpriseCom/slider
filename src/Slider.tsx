@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { MouseEvent as ReactMouseEvent, Ref } from 'react';
 import {
     Children,
     forwardRef,
@@ -17,11 +17,12 @@ import './Slider.scss';
 
 export namespace SliderTypes {
     export interface API {
-        scrollToSlide: (index: number, behaviour: ScrollBehavior) => void;
+        scrollToSlide: (index: number, behaviour: ScrollBehavior, returnMiddleSlide?: boolean) => void;
         scrollToNextSlide: () => void;
         scrollToPreviousSlide: () => void;
         getFirstFullyVisibleSlideIndex(): number;
         getLastFullyVisibleSlideIndex(): number;
+        wrapperRef: Ref<HTMLDivElement>;
     }
 }
 export enum Orientation {
@@ -138,7 +139,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         };
     };
 
-    const scrollToSlide = (index: number, behavior: ScrollBehavior) => {
+    const scrollToSlide = (index: number, behavior: ScrollBehavior, returnMiddleSlide? : boolean) => {
         const targetSlide = slides.current[index];
         const currentWrapper = wrapper.current;
 
@@ -159,6 +160,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
                     currentWrapper.offsetLeft,
                     currentWrapper.clientWidth,
                     targetSlide.element.clientWidth,
+                    returnMiddleSlide,
                 );
                 break;
             case Orientation.VERTICAL:
@@ -324,6 +326,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         scrollToPreviousSlide: scrollToPreviousSlide,
         getFirstFullyVisibleSlideIndex: getFirstVisibleSlideIndex,
         getLastFullyVisibleSlideIndex: getLastVisibleSlideIndex,
+        wrapperRef: wrapper,
     }));
 
     return (
