@@ -9,12 +9,17 @@ import ScrollToSlide from './examples/ScrollToSlide';
 import HideNavigation from './examples/HideNavigation';
 import Vertical from './examples/Vertical';
 import SingleSlide from './examples/SingleSlide';
+import InfiniteSliding from './examples/InfiniteSliding';
 import './Index.scss';
 
 const Index: React.FC = () => (
     <div className="container">
         <h1>YourSurprise Slider</h1>
         <a href="https://github.com/YourSurpriseCom/slider">GitHub</a>
+        <section>
+            <h1>Infinite Sliding with middle active slide</h1>
+            <InfiniteSliding/>
+        </section>
         <section>
             <h1>Dimensions</h1>
             <FixedWidth/>

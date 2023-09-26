@@ -39,7 +39,7 @@ body {
       &:last-child {
         .demo-slide {
           margin-right: 0;
-          margin-top: 0;
+          margin-top: 20px;
         }
       }
     }
@@ -50,8 +50,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
+  margin-right: 2px;
   border-radius:5px;
+  width: 80px;
+  height: 80px;
+  margin-top: 20px;
+  user-select: none;
+  opacity: 0.5;
 
   &--vertical {
     margin-bottom: 10px;
@@ -62,6 +67,19 @@ body {
   &--fixed {
     width: 200px;
     height: 200px;
+  }
+
+  img {
+    width: 100%;
+  }
+
+  &.active-slide {
+    border:  1px solid lightgrey;
+    height: 90px; /* Increase size for active slide */
+    width: 90px;
+    margin-top: 0;
+    opacity: 1;
+
   }
 }
 
@@ -78,14 +96,14 @@ body {
       }
 
       &__slide {
-       scroll-snap-align: center;
-       display: flex;
-       flex: 1 0 100%;
+        scroll-snap-align: center;
+        display: flex;
+        flex: 1 0 100%;
 
         .demo-slide {
           margin: 0;
         }
-     }
+      }
     }
   }
 }

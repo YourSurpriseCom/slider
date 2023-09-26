@@ -12,7 +12,7 @@ export enum NavigationDirection {
 }
 
 interface UseSlider {
-    getPositionToScrollTo: (direction: NavigationDirection, slideOffset: number, wrapperOffset: number, wrapperDimension: number, slideDimension: number) => number;
+    getPositionToScrollTo: (direction: NavigationDirection, slideOffset: number, wrapperOffset: number, wrapperDimension: number, slideDimension: number, returnMiddleSlide?: boolean) => number;
     getVisibilityByIntersectionRatio: (intersectionRatio: number) => Visibility;
     getFirstVisibleSlideIndex: () => number;
     getLastVisibleSlideIndex: () => number;
@@ -51,10 +51,11 @@ export const useSlider = (): UseSlider => {
         return Math.abs(delta) > 5;
     };
 
-    const getPositionToScrollTo = (direction: NavigationDirection, slideOffset: number, wrapperOffset: number, wrapperDimension: number, slideDimension: number) => {
+    const getPositionToScrollTo = (direction: NavigationDirection, slideOffset: number, wrapperOffset: number, wrapperDimension: number, slideDimension: number, returnMiddleSlide = false) => {
         let scroll = 0;
-
-        if (direction === NavigationDirection.PREV) {
+        if (returnMiddleSlide) {
+            scroll = slideOffset  - wrapperDimension / 2 + slideDimension / 2;
+        } else if (direction === NavigationDirection.PREV) {
             scroll = slideOffset - wrapperOffset - wrapperDimension + slideDimension;
         } else {
             scroll = slideOffset - wrapperOffset;
