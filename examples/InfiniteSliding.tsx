@@ -57,7 +57,7 @@ const InfiniteSliding: FC<typeof Slider extends ComponentType<infer T> ? Omit<T,
     }, [data, newIndexTobeInsertedOnBack]);
 
     // Inserts a specified number of slides at the beginning of the data.
-    // Example: If initialData is [1, 2, 3, 4] and we want to insert 2 slides at the end, the result is [1, 2, 3, 4, 1, 2].
+    // Example: If initialData is [1, 2, 3, 4] and we want to insert 2 slides at the beginning, the result is [3, 4, 1, 2, 3, 4].
 
     const insertSlidesAtTheBeginning = useCallback((numberOfSlidesToBeInserted : number) => {
         let index = newIndexTobeInsertedOnFront;
