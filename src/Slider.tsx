@@ -108,7 +108,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
     const mouseMoveHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
         const currentWrapper = wrapper.current;
-        const currentMousePos = mousePosition.current;
+        const currentMousePosition = mousePosition.current;
 
         if (!currentWrapper || !isDragging) {
             return;
@@ -116,18 +116,18 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
         switch (orientation) {
             case Orientation.HORIZONTAL:
-                if (shouldBlockClicks(currentMousePos.clientX - event.clientX)) {
+                if (shouldBlockClicks(currentMousePosition.clientX - event.clientX)) {
                     setIsBlockingClicks(true);
                 }
 
-                currentWrapper.scrollLeft = currentMousePos.scrollX + currentMousePos.clientX - event.clientX;
+                currentWrapper.scrollLeft = currentMousePosition.scrollX + currentMousePosition.clientX - event.clientX;
                 break;
             case Orientation.VERTICAL:
-                if (shouldBlockClicks(currentMousePos.clientY - event.clientY)) {
+                if (shouldBlockClicks(currentMousePosition.clientY - event.clientY)) {
                     setIsBlockingClicks(true);
                 }
 
-                currentWrapper.scrollTop = currentMousePos.scrollY + currentMousePos.clientY - event.clientY;
+                currentWrapper.scrollTop = currentMousePosition.scrollY + currentMousePosition.clientY - event.clientY;
                 break;
         }
     };
