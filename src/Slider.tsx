@@ -223,42 +223,35 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     useEffect(() => {
         const currentWrapper = wrapper.current;
 
-        if (!currentWrapper) {
-            return () => {};
+        if (!currentWrapper || !initialSlideIndex) {
+            return;
         }
 
-        const scrollToInitialSlide = () => {
-            if (initialSlideIndex !== 0) {
-                const targetSlide = slides.current[initialSlideIndex];
+        const targetSlide = slides.current[initialSlideIndex];
 
-                if (!targetSlide || !currentWrapper) {
-                    return;
-                }
+        if (!targetSlide) {
+            return;
+        }
 
-                let scrollLeft = undefined;
-                let scrollTop = undefined;
+        let scrollLeft = undefined;
+        let scrollTop = undefined;
 
-                switch (orientation) {
-                    case Orientation.HORIZONTAL:
-                        scrollLeft = targetSlide.element.offsetLeft - currentWrapper.offsetLeft;
-                        break;
-                    case Orientation.VERTICAL:
-                        scrollTop = targetSlide.element.offsetTop - currentWrapper.offsetTop;
-                        break;
-                }
+        switch (orientation) {
+            case Orientation.HORIZONTAL:
+                scrollLeft = targetSlide.element.offsetLeft - currentWrapper.offsetLeft;
+                break;
+            case Orientation.VERTICAL:
+                scrollTop = targetSlide.element.offsetTop - currentWrapper.offsetTop;
+                break;
+        }
 
-                const scrollOptions: Partial<ScrollToOptions> = {
-                    behavior: 'instant',
-                    ...(Number.isInteger(scrollLeft) && { left: scrollLeft } ),
-                    ...(Number.isInteger(scrollTop) && { top: scrollTop } ),
-                };
-
-                currentWrapper.scrollTo(scrollOptions);
-            }
+        const scrollOptions: Partial<ScrollToOptions> = {
+            behavior: 'instant',
+            ...(Number.isInteger(scrollLeft) && { left: scrollLeft } ),
+            ...(Number.isInteger(scrollTop) && { top: scrollTop } ),
         };
 
-
-        scrollToInitialSlide();
+        currentWrapper.scrollTo(scrollOptions);
 
     }, [wrapper, initialSlideIndex, orientation]);
 
