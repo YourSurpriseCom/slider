@@ -131,13 +131,6 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         }
     };
 
-    const addSlide = (node: HTMLDivElement, index: number) => {
-        slides.current[index] = {
-            element: node,
-            visibility: Visibility.NONE,
-        };
-    };
-
     const scrollToSlide = (index: number, behavior: ScrollBehavior) => {
         const targetSlide = slides.current[index];
         const currentWrapper = wrapper.current;
@@ -201,6 +194,16 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         setNextArrowVisible(isScrollable && !lastSlideFullyVisible);
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
 
+    const checkScrollable = useCallback(() => {
+        const currentWrapper = wrapper.current;
+
+        if (!currentWrapper) {
+            return;
+        }
+
+        setIsScrollable(orientation === Orientation.VERTICAL ? currentWrapper.scrollHeight > currentWrapper.clientHeight : currentWrapper.scrollWidth > currentWrapper.clientWidth);
+    }, [orientation]);
+
     useEffect(() => {
         const currentWrapper = wrapper.current;
 
@@ -208,7 +211,21 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             return () => {};
         }
 
-        const checkScrollable = () => setIsScrollable(orientation === Orientation.VERTICAL ? currentWrapper.scrollHeight > currentWrapper.clientHeight : currentWrapper.scrollWidth > currentWrapper.clientWidth);
+        window?.addEventListener('resize', checkScrollable);
+
+        checkScrollable();
+
+        return () => {
+            window?.removeEventListener('resize', checkScrollable);
+        };
+    });
+
+    useEffect(() => {
+        const currentWrapper = wrapper.current;
+
+        if (!currentWrapper) {
+            return () => {};
+        }
 
         const scrollToInitialSlide = () => {
             if (initialSlideIndex !== 0) {
@@ -240,14 +257,9 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             }
         };
 
-        window?.addEventListener('resize', checkScrollable);
 
-        checkScrollable();
         scrollToInitialSlide();
 
-        return () => {
-            window?.removeEventListener('resize', checkScrollable);
-        };
     }, [wrapper, initialSlideIndex, orientation]);
 
     useEffect(() => {
@@ -325,6 +337,15 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         getFirstFullyVisibleSlideIndex: getFirstVisibleSlideIndex,
         getLastFullyVisibleSlideIndex: getLastVisibleSlideIndex,
     }));
+
+    const addSlide = (node: HTMLDivElement, index: number) => {
+        slides.current[index] = {
+            element: node,
+            visibility: Visibility.NONE,
+        };
+
+        checkScrollable();
+    };
 
     return (
         <div className="slider">
