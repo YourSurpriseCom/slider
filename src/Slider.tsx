@@ -58,7 +58,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [isBlockingClicks, setIsBlockingClicks] = useState<boolean>(false);
 
-    const [mousePosition, setMousePosition] = useState<{
+    const mousePosition = useRef<{
         clientX: number;
         clientY: number
         scrollX: number;
@@ -95,19 +95,20 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     const mouseUpHandler = () => setIsDragging(false);
 
     const mouseDownHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
-        setMousePosition({
+        mousePosition.current = {
             ...mousePosition,
             clientX: event.clientX,
             clientY: event.clientY,
             scrollX: wrapper.current?.scrollLeft ?? 0,
             scrollY: wrapper.current?.scrollTop ?? 0,
-        });
+        };
 
         setIsDragging(true);
     };
 
     const mouseMoveHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
         const currentWrapper = wrapper.current;
+        const currentMousePos = mousePosition.current;
 
         if (!currentWrapper || !isDragging) {
             return;
@@ -115,18 +116,18 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
         switch (orientation) {
             case Orientation.HORIZONTAL:
-                if (shouldBlockClicks(mousePosition.clientX - event.clientX)) {
+                if (shouldBlockClicks(currentMousePos.clientX - event.clientX)) {
                     setIsBlockingClicks(true);
                 }
 
-                currentWrapper.scrollLeft = mousePosition.scrollX + mousePosition.clientX - event.clientX;
+                currentWrapper.scrollLeft = currentMousePos.scrollX + currentMousePos.clientX - event.clientX;
                 break;
             case Orientation.VERTICAL:
-                if (shouldBlockClicks(mousePosition.clientY - event.clientY)) {
+                if (shouldBlockClicks(currentMousePos.clientY - event.clientY)) {
                     setIsBlockingClicks(true);
                 }
 
-                currentWrapper.scrollTop = mousePosition.scrollY + mousePosition.clientY - event.clientY;
+                currentWrapper.scrollTop = currentMousePos.scrollY + currentMousePos.clientY - event.clientY;
                 break;
         }
     };
