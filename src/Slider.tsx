@@ -58,7 +58,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [isBlockingClicks, setIsBlockingClicks] = useState<boolean>(false);
 
-    const [mousePosition, setMousePosition] = useState<{
+    const mousePosition = useRef<{
         clientX: number;
         clientY: number
         scrollX: number;
@@ -95,19 +95,20 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     const mouseUpHandler = () => setIsDragging(false);
 
     const mouseDownHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
-        setMousePosition({
+        mousePosition.current = {
             ...mousePosition,
             clientX: event.clientX,
             clientY: event.clientY,
             scrollX: wrapper.current?.scrollLeft ?? 0,
             scrollY: wrapper.current?.scrollTop ?? 0,
-        });
+        };
 
         setIsDragging(true);
     };
 
     const mouseMoveHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
         const currentWrapper = wrapper.current;
+        const currentMousePosition = mousePosition.current;
 
         if (!currentWrapper || !isDragging) {
             return;
@@ -115,27 +116,20 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
         switch (orientation) {
             case Orientation.HORIZONTAL:
-                if (shouldBlockClicks(mousePosition.clientX - event.clientX)) {
+                if (shouldBlockClicks(currentMousePosition.clientX - event.clientX)) {
                     setIsBlockingClicks(true);
                 }
 
-                currentWrapper.scrollLeft = mousePosition.scrollX + mousePosition.clientX - event.clientX;
+                currentWrapper.scrollLeft = currentMousePosition.scrollX + currentMousePosition.clientX - event.clientX;
                 break;
             case Orientation.VERTICAL:
-                if (shouldBlockClicks(mousePosition.clientY - event.clientY)) {
+                if (shouldBlockClicks(currentMousePosition.clientY - event.clientY)) {
                     setIsBlockingClicks(true);
                 }
 
-                currentWrapper.scrollTop = mousePosition.scrollY + mousePosition.clientY - event.clientY;
+                currentWrapper.scrollTop = currentMousePosition.scrollY + currentMousePosition.clientY - event.clientY;
                 break;
         }
-    };
-
-    const addSlide = (node: HTMLDivElement, index: number) => {
-        slides.current[index] = {
-            element: node,
-            visibility: Visibility.NONE,
-        };
     };
 
     const scrollToSlide = (index: number, behavior: ScrollBehavior) => {
@@ -201,6 +195,16 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         setNextArrowVisible(isScrollable && !lastSlideFullyVisible);
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
 
+    const checkScrollable = useCallback(() => {
+        const currentWrapper = wrapper.current;
+
+        if (!currentWrapper) {
+            return;
+        }
+
+        setIsScrollable(orientation === Orientation.VERTICAL ? currentWrapper.scrollHeight > currentWrapper.clientHeight : currentWrapper.scrollWidth > currentWrapper.clientWidth);
+    }, [orientation]);
+
     useEffect(() => {
         const currentWrapper = wrapper.current;
 
@@ -208,46 +212,48 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             return () => {};
         }
 
-        const checkScrollable = () => setIsScrollable(orientation === Orientation.VERTICAL ? currentWrapper.scrollHeight > currentWrapper.clientHeight : currentWrapper.scrollWidth > currentWrapper.clientWidth);
-
-        const scrollToInitialSlide = () => {
-            if (initialSlideIndex !== 0) {
-                const targetSlide = slides.current[initialSlideIndex];
-
-                if (!targetSlide || !currentWrapper) {
-                    return;
-                }
-
-                let scrollLeft = undefined;
-                let scrollTop = undefined;
-
-                switch (orientation) {
-                    case Orientation.HORIZONTAL:
-                        scrollLeft = targetSlide.element.offsetLeft - currentWrapper.offsetLeft;
-                        break;
-                    case Orientation.VERTICAL:
-                        scrollTop = targetSlide.element.offsetTop - currentWrapper.offsetTop;
-                        break;
-                }
-
-                const scrollOptions: Partial<ScrollToOptions> = {
-                    behavior: 'instant',
-                    ...(Number.isInteger(scrollLeft) && { left: scrollLeft } ),
-                    ...(Number.isInteger(scrollTop) && { top: scrollTop } ),
-                };
-
-                currentWrapper.scrollTo(scrollOptions);
-            }
-        };
-
         window?.addEventListener('resize', checkScrollable);
 
         checkScrollable();
-        scrollToInitialSlide();
 
         return () => {
             window?.removeEventListener('resize', checkScrollable);
         };
+    });
+
+    useEffect(() => {
+        const currentWrapper = wrapper.current;
+
+        if (!currentWrapper || !initialSlideIndex) {
+            return;
+        }
+
+        const targetSlide = slides.current[initialSlideIndex];
+
+        if (!targetSlide) {
+            return;
+        }
+
+        let scrollLeft = undefined;
+        let scrollTop = undefined;
+
+        switch (orientation) {
+            case Orientation.HORIZONTAL:
+                scrollLeft = targetSlide.element.offsetLeft - currentWrapper.offsetLeft;
+                break;
+            case Orientation.VERTICAL:
+                scrollTop = targetSlide.element.offsetTop - currentWrapper.offsetTop;
+                break;
+        }
+
+        const scrollOptions: Partial<ScrollToOptions> = {
+            behavior: 'instant',
+            ...(Number.isInteger(scrollLeft) && { left: scrollLeft } ),
+            ...(Number.isInteger(scrollTop) && { top: scrollTop } ),
+        };
+
+        currentWrapper.scrollTo(scrollOptions);
+
     }, [wrapper, initialSlideIndex, orientation]);
 
     useEffect(() => {
@@ -325,6 +331,15 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         getFirstFullyVisibleSlideIndex: getFirstVisibleSlideIndex,
         getLastFullyVisibleSlideIndex: getLastVisibleSlideIndex,
     }));
+
+    const addSlide = (node: HTMLDivElement, index: number) => {
+        slides.current[index] = {
+            element: node,
+            visibility: Visibility.NONE,
+        };
+
+        checkScrollable();
+    };
 
     return (
         <div className="slider">
