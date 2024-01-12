@@ -7,6 +7,7 @@ updates:
     reviewers:
       - "iFiz"
     groups:
-      dev-dependencies:
-        patterns:
-          - "*"
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
