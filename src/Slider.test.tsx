@@ -148,6 +148,13 @@ describe('Slider', () => {
     });
 
     describe('controls', () => {
+        it('does not render controls if both are hidden',  () => {
+            renderSliderWithDimensions({});
+
+            const nextButton = screen.queryByLabelText('Next slide');
+            expect(nextButton).not.toBeInTheDocument();
+        });
+
         it('sets controls visibility initially', () => {
             renderSliderWithDimensions({});
 
