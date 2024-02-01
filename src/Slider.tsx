@@ -203,10 +203,6 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         }
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
 
-    useEffect(() => {
-
-    }, []);
-
     const checkScrollable = useCallback(() => {
         const currentWrapper = wrapper.current;
 
