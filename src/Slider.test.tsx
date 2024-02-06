@@ -148,6 +148,25 @@ describe('Slider', () => {
     });
 
     describe('controls', () => {
+        it('does not render controls if both are hidden',  () => {
+            renderSliderWithDimensions({
+                clientWidth: 3000,
+            });
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+
+            act(() => {
+                intersectionCallback([], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            const nextButton = screen.queryByLabelText('Next slide');
+            const prevButton = screen.queryByLabelText('Previous slide');
+
+            expect(nextButton).not.toBeInTheDocument();
+            expect(prevButton).not.toBeInTheDocument();
+        });
+
         it('sets controls visibility initially', () => {
             renderSliderWithDimensions({});
 

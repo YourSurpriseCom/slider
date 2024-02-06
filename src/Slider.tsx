@@ -57,6 +57,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     const [isScrollable, setIsScrollable] = useState<boolean>(false);
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [isBlockingClicks, setIsBlockingClicks] = useState<boolean>(false);
+    const [showNavigationButtons, setShowNavigationButtons] = useState<boolean>(!hideNavigationButtons);
 
     const mousePosition = useRef<{
         clientX: number;
@@ -190,9 +191,16 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
     const setControlsVisibility = useCallback(() => {
         const lastSlideFullyVisible = getLastVisibleSlideIndex() + 1 === slides.current.length;
+        const isPrevArrowVisible = getFirstVisibleSlideIndex() > 0 && isScrollable;
+        const isNextArrowVisible = isScrollable && !lastSlideFullyVisible;
 
-        setPrevArrowVisible(getFirstVisibleSlideIndex() > 0 && isScrollable);
-        setNextArrowVisible(isScrollable && !lastSlideFullyVisible);
+        if (!isPrevArrowVisible && !isNextArrowVisible) {
+            setShowNavigationButtons(false);
+        } else {
+            setPrevArrowVisible(isPrevArrowVisible);
+            setNextArrowVisible(isNextArrowVisible);
+            setShowNavigationButtons(true);
+        }
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, isScrollable]);
 
     const checkScrollable = useCallback(() => {
@@ -361,7 +369,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
                     </div>
                 ))}
             </div>
-            { !hideNavigationButtons && (
+            { showNavigationButtons && (
                 <>
                     <PreviousButton onClick={scrollToPreviousSlide} isHidden={!prevArrowVisible} direction={orientation}/>
                     <NextButton onClick={scrollToNextSlide} isHidden={!nextArrowVisible} direction={orientation}/>
