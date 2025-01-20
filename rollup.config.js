@@ -28,7 +28,7 @@ export default {
             tsconfig: './tsconfig.json',
         }),
         styles({
-            extract: 'index.css',
+            mode: ['extract', 'index.css'],
             sourceMap: true,
         }),
     ],
