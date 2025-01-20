@@ -13,11 +13,13 @@ export default {
             file: packageJson.module,
             format: 'es',
             sourcemap: true,
+            assetFileNames: '[name][extname]',
         },
         {
             file: packageJson.main,
             format: 'cjs',
             sourcemap: true,
+            assetFileNames: '[name][extname]',
         },
     ],
     plugins: [
