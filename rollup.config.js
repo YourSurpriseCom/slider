@@ -2,7 +2,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import external from 'rollup-plugin-peer-deps-external';
-import postcss from 'rollup-plugin-postcss';
+import styles from 'rollup-plugin-styler';
 
 const packageJson = require('./package.json');
 
@@ -13,11 +13,13 @@ export default {
             file: packageJson.module,
             format: 'es',
             sourcemap: true,
+            assetFileNames: '[name][extname]',
         },
         {
             file: packageJson.main,
             format: 'cjs',
             sourcemap: true,
+            assetFileNames: '[name][extname]',
         },
     ],
     plugins: [
@@ -27,8 +29,8 @@ export default {
         typescript({
             tsconfig: './tsconfig.json',
         }),
-        postcss({
-            extract: 'index.css',
+        styles({
+            mode: ['extract', 'index.css'],
             sourceMap: true,
         }),
     ],
