@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import type { SliderTypes } from './Slider';
 import { Orientation, Slider } from './Slider';
-import React, { ComponentType } from 'react';
+import React, { type ComponentType } from 'react';
 
 type SliderOptions = typeof Slider extends ComponentType<infer T> ? Omit<T, 'children'> : never;
 
@@ -222,7 +222,7 @@ describe('Slider', () => {
             const clickSpy = jest.fn();
 
             render(<Slider>
-                <span key={1} data-testid="1" onClick={clickSpy}/>
+                <button type="button" key={1} data-testid="1" onClick={clickSpy}/>
             </Slider>);
 
             const scrollElement = screen.getByRole('list');
@@ -381,7 +381,7 @@ describe('Slider', () => {
             ['only the first slide is not visible', [0, 1, 1, 1], false, true],
             ['only the last slide is not visible', [1, 1, 1, 0], true, false],
             ['only a single slide is partially visible', [0, 0, 0.5, 0], false, false],
-        ])('updates controls visibility when %s', (testCase, intersections, prevButtonHidden, nextButtonHidden) => {
+        ])('updates controls visibility when %s', (_, intersections, prevButtonHidden, nextButtonHidden) => {
             Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 500 });
             Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { configurable: true, value: 1000 });
             Object.defineProperty(HTMLElement.prototype, 'scrollLeft', {
@@ -598,7 +598,7 @@ describe('Slider', () => {
         });
     });
 
-    describe('onSlide', function () {
+    describe('onSlide', () => {
         it('calls the onSlide callback when an intersection occurs', () => {
             const onSlideSpy = jest.fn();
             render(<Slider onSlide={onSlideSpy}>
@@ -640,8 +640,8 @@ describe('Slider', () => {
                 { intersectionRatio: 0, target: slides[4] } as unknown as IntersectionObserverEntry,
             ], mockIntersectionObserver.mock.instances[0]);
 
-            expect(ref.current!.getFirstFullyVisibleSlideIndex()).toBe(0);
-            expect(ref.current!.getLastFullyVisibleSlideIndex()).toBe(2);
+            expect(ref.current?.getFirstFullyVisibleSlideIndex()).toBe(0);
+            expect(ref.current?.getLastFullyVisibleSlideIndex()).toBe(2);
         });
     });
 });

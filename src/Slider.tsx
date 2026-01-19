@@ -3,7 +3,7 @@ import type { MouseEvent as ReactMouseEvent } from 'react';
 import {
     Children,
     forwardRef,
-    PropsWithChildren,
+    type PropsWithChildren,
     useCallback,
     useEffect,
     useImperativeHandle,
@@ -143,8 +143,8 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
         const navDirection = (index >= getFirstVisibleSlideIndex()) ? NavigationDirection.NEXT : NavigationDirection.PREV;
 
-        let scrollLeft = undefined;
-        let scrollTop = undefined;
+        let scrollLeft: number | undefined;
+        let scrollTop: number | undefined;
 
         switch (orientation) {
             case Orientation.HORIZONTAL:
@@ -242,8 +242,8 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             return;
         }
 
-        let scrollLeft = undefined;
-        let scrollTop = undefined;
+        let scrollLeft: number | undefined;
+        let scrollTop: number | undefined;
 
         switch (orientation) {
             case Orientation.HORIZONTAL:
@@ -262,7 +262,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
         currentWrapper.scrollTo(scrollOptions);
 
-    }, [wrapper, initialSlideIndex, orientation]);
+    }, [initialSlideIndex, orientation]);
 
     useEffect(() => {
         const onDocumentMouseUp = (event: MouseEvent) => {
@@ -313,11 +313,12 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             threshold: [0, 0.5, 0.9, 1],
         });
 
-        slides.current.forEach(({ element }) => intersectionObserver.observe(element));
+        slides.current.forEach(({ element }) => {
+            intersectionObserver.observe(element);
+        });
 
         return () => intersectionObserver.disconnect();
     }, [
-        wrapper,
         setControlsVisibility,
         hideNavigationButtons,
         sortSlides,
@@ -326,7 +327,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         addPartiallyVisibleSlide,
         removePartiallyVisibleSlide,
         getVisibilityByIntersectionRatio,
-        onSlide,
+        onSlide
     ]);
 
     const scrollToNextSlide = () => navigate(NavigationDirection.NEXT);
@@ -351,6 +352,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
     return (
         <div className="slider">
+            {/** biome-ignore lint/a11y/useSemanticElements: Would rather use semantic elements for this, but it would break existing implementations */}
             <div role="list" ref={wrapper}
                 onMouseDown={mouseDownHandler}
                 onMouseMove={mouseMoveHandler}
@@ -364,6 +366,8 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
                 })}
             >
                 {Children.map(children, (child, index: number) => (
+                    // biome-ignore lint/a11y/useSemanticElements: Would rather use semantic elements for this, but it would break existing implementations
+                    // biome-ignore lint/suspicious/noArrayIndexKey: We currently do not have a better alternative available
                     <div className="slider__wrapper__slide" role="listitem" key={index} data-slide-index={index} ref={(node) => { if (node) { addSlide(node, index); } }}>
                         {child}
                     </div>
