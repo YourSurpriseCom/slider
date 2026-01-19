@@ -1,5 +1,5 @@
-import type { FC, ComponentType } from 'react';
-import React, { useRef, useState } from 'react';
+import type {FC, ComponentType, ReactElement} from 'react';
+import { useRef, useState } from 'react';
 import { Slider } from '../src';
 import type { SliderTypes } from '../src';
 
@@ -8,7 +8,7 @@ const OnSlide: FC<typeof Slider extends ComponentType<infer T> ? Omit<T, 'childr
     const [firstVisibleSlideIndex, setFirstVisibleSlideIndex] = useState<number>(0);
     const [lastVisibleSlideIndex, setLastVisibleSlideIndex] = useState<number>(0);
 
-    const slides: JSX.Element[] = [
+    const slides: ReactElement[] = [
         <div key="slide 1" className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(50, 50, 50)' }}>Slide 1</div>,
         <div key="slide 2" className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(75, 75, 75)' }}>Slide 2</div>,
         <div key="slide 3" className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(100, 100, 100)' }}>Slide 3</div>,

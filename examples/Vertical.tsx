@@ -1,5 +1,4 @@
 import type { ComponentType, FC } from 'react';
-import React from 'react';
 import { Slider } from '../src';
 import { Orientation } from '../src/Slider';
 

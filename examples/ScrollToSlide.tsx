@@ -1,5 +1,5 @@
-import type { FC, ComponentType } from 'react';
-import React, { useRef } from 'react';
+import type { ComponentType, FC } from 'react';
+import { useRef } from 'react';
 import { Slider } from '../src';
 import type { SliderTypes } from '../src';
 
@@ -9,7 +9,7 @@ const ScrollToSlide: FC<typeof Slider extends ComponentType<infer T> ? Omit<T, '
     return (
         <>
             <h3>Slides with ScrollToSlide button</h3>
-            <button onClick={() => sliderRefObject.current !== null && sliderRefObject.current.scrollToSlide(2, 'smooth')}>Scroll to slideIndex 2 (Slide 3)</button>
+            <button type="button" onClick={() => sliderRefObject.current?.scrollToSlide(2, 'smooth')}>Scroll to slideIndex 2 (Slide 3)</button>
             <br/><br/>
             <Slider {...sliderProps} ref={sliderRefObject}>
                 <div className="demo-slide demo-slide--fixed" style={{ backgroundColor: 'rgb(50, 50, 50)' }}>Slide 1</div>
