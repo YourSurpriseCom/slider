@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { createRoot } from 'react-dom/client';
 import OnSlide from './examples/OnSlide';
 import FixedWidth from './examples/FixedWidth';
@@ -39,5 +39,8 @@ const Index: React.FC = () => (
     </div>
 );
 
+const demoContainer = document.getElementById('demo');
 
-(createRoot(document.getElementById('demo')!)).render(<Index/>);
+if (demoContainer) {
+    createRoot(demoContainer).render(<Index/>);
+}

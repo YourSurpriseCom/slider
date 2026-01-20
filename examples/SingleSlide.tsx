@@ -1,5 +1,4 @@
-import type { FC, ComponentType } from 'react';
-import React from 'react';
+import type { ComponentType, FC } from 'react';
 import { Slider } from '../src';
 
 const SingleSlide: FC<typeof Slider extends ComponentType<infer T> ? Omit<T, 'children'> : never> = (sliderProps) =>  (
