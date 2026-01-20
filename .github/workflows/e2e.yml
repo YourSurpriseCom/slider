@@ -7,11 +7,19 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        react: [18, 19]
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Install
         run: npm ci
+      - name: Install React
+        run: npm install react@${{ matrix.react}} react-dom@${{ matrix.react}} --no-save
       - name: Install browsers
         run: npx playwright install --with-deps
       - name: Run E2E tests
@@ -19,6 +27,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.runs-on }}
+          name: playwright-report-${{ matrix.runs-on }}-${{ matrix.react }}
           path: playwright-report/
           retention-days: 1
