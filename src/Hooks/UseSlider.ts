@@ -33,9 +33,13 @@ export const useSlider = (): UseSlider => {
     const getLastVisibleSlideIndex = (): number => visibleSlideIndices.current[visibleSlideIndices.current.length - 1]
         ?? partiallyVisibleSlideIndices.current[partiallyVisibleSlideIndices.current.length - 1] ?? -1;
 
-    const addVisibleSlide = (index: number) => visibleSlideIndices.current.push(index);
+    const addVisibleSlide = (index: number) => {
+        visibleSlideIndices.current.push(index);
+    }
 
-    const addPartiallyVisibleSlide = (index: number) => partiallyVisibleSlideIndices.current.push(index);
+    const addPartiallyVisibleSlide = (index: number) => {
+        partiallyVisibleSlideIndices.current.push(index);
+    }
 
     const removePartiallyVisibleSlide = (index: number) => {
         partiallyVisibleSlideIndices.current = partiallyVisibleSlideIndices.current.filter((slideIndex) => slideIndex !== index);
