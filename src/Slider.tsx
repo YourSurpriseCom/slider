@@ -34,6 +34,7 @@ interface Settings {
     initialSlideIndex?: number;
     onSlide?: () => void;
     orientation?: `${Orientation}`,
+    singleSlideView?: boolean;
 }
 
 interface SlideVisibilityEntry {
@@ -47,6 +48,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     initialSlideIndex = 0,
     onSlide = () => null,
     orientation = Orientation.HORIZONTAL,
+    singleSlideView = false,
 }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement | null>(null);
@@ -363,6 +365,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
                     'slider__wrapper--is-dragging': isDragging,
                     'slider__wrapper--is-horizontal': orientation === Orientation.HORIZONTAL,
                     'slider__wrapper--is-vertical': orientation === Orientation.VERTICAL,
+                    'slider__wrapper--single-slide-view': singleSlideView,
                 })}
             >
                 {Children.map(children, (child, index: number) => (
