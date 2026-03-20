@@ -74,7 +74,6 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         scrollY: 0,
     });
 
-
     const {
         getPositionToScrollTo,
         getVisibilityByIntersectionRatio,
