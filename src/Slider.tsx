@@ -52,6 +52,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement | null>(null);
+    const dragStartSlideIndex = useRef<number>(0);
 
     const [nextArrowVisible, setNextArrowVisible] = useState<boolean>(false);
     const [prevArrowVisible, setPrevArrowVisible] = useState<boolean>(false);
@@ -72,6 +73,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         scrollX: 0,
         scrollY: 0,
     });
+
 
     const {
         getPositionToScrollTo,
@@ -95,8 +97,6 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         setIsBlockingClicks(false);
     };
 
-    const mouseUpHandler = () => setIsDragging(false);
-
     const mouseDownHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
         mousePosition.current = {
             ...mousePosition,
@@ -105,6 +105,10 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             scrollX: wrapper.current?.scrollLeft ?? 0,
             scrollY: wrapper.current?.scrollTop ?? 0,
         };
+
+        if (singleSlideView) {
+            dragStartSlideIndex.current = getFirstVisibleSlideIndex();
+        }
 
         setIsDragging(true);
     };
@@ -135,7 +139,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         }
     };
 
-    const scrollToSlide = (index: number, behavior: ScrollBehavior) => {
+    const scrollToSlide = useCallback((index: number, behavior: ScrollBehavior) => {
         const targetSlide = slides.current[index];
         const currentWrapper = wrapper.current;
 
@@ -177,7 +181,33 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
 
         currentWrapper.scrollTo(scrollOptions);
-    };
+    }, [orientation, getFirstVisibleSlideIndex, getPositionToScrollTo]);
+
+    const smoothSingleViewDesktopSwipe = useCallback((clientX: number, clientY: number) => {
+        const hasNoNativeSwipe = window.matchMedia('(hover: hover)').matches;
+
+        if (singleSlideView && hasNoNativeSwipe) {
+            const dragDelta = orientation === Orientation.VERTICAL
+                ? mousePosition.current.clientY - clientY
+                : mousePosition.current.clientX - clientX;
+
+            const swipeThreshold = 50;
+
+            if (Math.abs(dragDelta) > swipeThreshold) {
+                const targetIndex = dragDelta > 0
+                    ? dragStartSlideIndex.current + 1
+                    : dragStartSlideIndex.current - 1;
+                scrollToSlide(Math.max(0, Math.min(slides.current.length - 1, targetIndex)), 'smooth');
+            } else {
+                scrollToSlide(dragStartSlideIndex.current, 'smooth');
+            }
+        }
+
+        setIsBlockingClicks(false);
+        setIsDragging(false);
+    }, [singleSlideView, orientation, scrollToSlide]);
+
+    const mouseUpHandler = (event: ReactMouseEvent<HTMLDivElement>) => smoothSingleViewDesktopSwipe(event.clientX, event.clientY);
 
     const navigate = (navDirection: NavigationDirection) => {
         const currentWrapper = wrapper.current;
@@ -271,8 +301,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             event.stopPropagation();
             event.preventDefault();
 
-            setIsBlockingClicks(false);
-            setIsDragging(false);
+            smoothSingleViewDesktopSwipe(event.clientX, event.clientY);
         };
 
         if (isDragging) {
@@ -282,7 +311,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         return () => {
             document?.removeEventListener('mouseup', onDocumentMouseUp);
         };
-    }, [isDragging]);
+    }, [isDragging, smoothSingleViewDesktopSwipe]);
 
     useEffect(() => {
         const currentWrapper = wrapper.current;
