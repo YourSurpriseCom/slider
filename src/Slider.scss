@@ -51,7 +51,7 @@
       scroll-snap-align: start;
     }
 
-    &--single-slide-view {
+    &--is-single-slide-view {
       scroll-snap-type: both mandatory;
 
       &.slider__wrapper--is-dragging {

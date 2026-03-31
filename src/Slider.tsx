@@ -190,7 +190,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, scrollToSlide]);
 
     const snapAfterDrag = useCallback(() => {
-        if (!isBlockingClicks || !singleSlideView) {
+        if (!isBlockingClicks) {
             return;
         }
 
@@ -207,10 +207,12 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         } else if (delta < -5) {
             navigate(NavigationDirection.PREV);
         }
-    }, [isBlockingClicks, singleSlideView, orientation, navigate]);
+    }, [isBlockingClicks, orientation, navigate]);
 
     const mouseUpHandler = () => {
-        snapAfterDrag();
+        if (singleSlideView) {
+            snapAfterDrag();
+        }
         setIsDragging(false);
     };
 
@@ -294,7 +296,9 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             event.stopPropagation();
             event.preventDefault();
 
-            snapAfterDrag();
+            if (singleSlideView) {
+                snapAfterDrag();
+            }
             setIsBlockingClicks(false);
             setIsDragging(false);
         };
@@ -306,7 +310,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         return () => {
             document?.removeEventListener('mouseup', onDocumentMouseUp);
         };
-    }, [isDragging, snapAfterDrag]);
+    }, [isDragging, singleSlideView, snapAfterDrag]);
 
     useEffect(() => {
         const currentWrapper = wrapper.current;
@@ -389,7 +393,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
                     'slider__wrapper--is-dragging': isDragging,
                     'slider__wrapper--is-horizontal': orientation === Orientation.HORIZONTAL,
                     'slider__wrapper--is-vertical': orientation === Orientation.VERTICAL,
-                    'slider__wrapper--single-slide-view': singleSlideView,
+                    'slider__wrapper--is-single-slide-view': singleSlideView,
                 })}
             >
                 {Children.map(children, (child, index: number) => (

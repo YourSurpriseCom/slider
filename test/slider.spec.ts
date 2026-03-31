@@ -49,7 +49,7 @@ test('can drag with the mouse to progress the slider', async ({ page }) => {
 test('singleSlideView: drag snaps to next and previous slide (horizontal)', async ({ page }) => {
     await page.goto('http://localhost:1234/');
 
-    const slider = page.locator('.slider__wrapper--single-slide-view').first();
+    const slider = page.locator('.slider__wrapper--is-single-slide-view').first();
     const slides = slider.getByRole('listitem');
     const firstSlide = slides.first();
     const secondSlide = slides.nth(1);
@@ -78,7 +78,7 @@ test('singleSlideView: drag snaps to next and previous slide (horizontal)', asyn
 test('singleSlideView: drag snaps to next and previous slide (vertical)', async ({ page }) => {
     await page.goto('http://localhost:1234/');
 
-    const slider = page.locator('.slider__wrapper--single-slide-view').nth(1);
+    const slider = page.locator('.slider__wrapper--is-single-slide-view').nth(1);
     const slides = slider.getByRole('listitem');
     const firstSlide = slides.first();
     const secondSlide = slides.nth(1);
