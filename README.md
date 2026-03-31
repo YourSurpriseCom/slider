@@ -65,6 +65,7 @@ export default function YourComponent() {
 | initialSlideIndex     | `number`   | `false`  | `0`          | Open the Slider at a specific index                     |
 | onSlide               | `function` | `false`  | `undefined`  | A callback function that is called when the user slides |
 | direction             | `string`   | `false`  | `horizontal` | Direction of the slider: 'horizontal' or 'vertical'     |
+| singleSlideView       | `boolean`  | `false`  | `false`      | Shows one slide at a time, snapping to each slide on drag |
 
 ### API
 

@@ -34,6 +34,7 @@ interface Settings {
     initialSlideIndex?: number;
     onSlide?: () => void;
     orientation?: `${Orientation}`,
+    singleSlideView?: boolean;
 }
 
 interface SlideVisibilityEntry {
@@ -47,6 +48,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
     initialSlideIndex = 0,
     onSlide = () => null,
     orientation = Orientation.HORIZONTAL,
+    singleSlideView = false,
 }, ref) => {
     const slides = useRef<SlideVisibilityEntry[]>([]);
     const wrapper = useRef<HTMLDivElement | null>(null);
@@ -93,8 +95,6 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         setIsBlockingClicks(false);
     };
 
-    const mouseUpHandler = () => setIsDragging(false);
-
     const mouseDownHandler = (event: ReactMouseEvent<HTMLDivElement>) => {
         mousePosition.current = {
             ...mousePosition,
@@ -133,7 +133,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         }
     };
 
-    const scrollToSlide = (index: number, behavior: ScrollBehavior) => {
+    const scrollToSlide = useCallback((index: number, behavior: ScrollBehavior) => {
         const targetSlide = slides.current[index];
         const currentWrapper = wrapper.current;
 
@@ -175,9 +175,9 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
 
 
         currentWrapper.scrollTo(scrollOptions);
-    };
+    }, [orientation, getFirstVisibleSlideIndex, getPositionToScrollTo]);
 
-    const navigate = (navDirection: NavigationDirection) => {
+    const navigate = useCallback((navDirection: NavigationDirection) => {
         const currentWrapper = wrapper.current;
 
         if (!currentWrapper) {
@@ -187,6 +187,33 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         const targetSlideIndex = navDirection === NavigationDirection.PREV ? getFirstVisibleSlideIndex() - 1 : getLastVisibleSlideIndex() + 1;
 
         scrollToSlide(targetSlideIndex, 'smooth');
+    }, [getFirstVisibleSlideIndex, getLastVisibleSlideIndex, scrollToSlide]);
+
+    const snapAfterDrag = useCallback(() => {
+        if (!isBlockingClicks) {
+            return;
+        }
+
+        const startPos = orientation === Orientation.HORIZONTAL
+            ? mousePosition.current.scrollX
+            : mousePosition.current.scrollY;
+        const currentPos = orientation === Orientation.HORIZONTAL
+            ? wrapper.current?.scrollLeft ?? 0
+            : wrapper.current?.scrollTop ?? 0;
+        const delta = currentPos - startPos;
+
+        if (delta > 5) {
+            navigate(NavigationDirection.NEXT);
+        } else if (delta < -5) {
+            navigate(NavigationDirection.PREV);
+        }
+    }, [isBlockingClicks, orientation, navigate]);
+
+    const mouseUpHandler = () => {
+        if (singleSlideView) {
+            snapAfterDrag();
+        }
+        setIsDragging(false);
     };
 
     const setControlsVisibility = useCallback(() => {
@@ -269,6 +296,9 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
             event.stopPropagation();
             event.preventDefault();
 
+            if (singleSlideView) {
+                snapAfterDrag();
+            }
             setIsBlockingClicks(false);
             setIsDragging(false);
         };
@@ -280,7 +310,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
         return () => {
             document?.removeEventListener('mouseup', onDocumentMouseUp);
         };
-    }, [isDragging]);
+    }, [isDragging, singleSlideView, snapAfterDrag]);
 
     useEffect(() => {
         const currentWrapper = wrapper.current;
@@ -363,6 +393,7 @@ export const Slider = forwardRef<SliderTypes.API, PropsWithChildren<Settings>>((
                     'slider__wrapper--is-dragging': isDragging,
                     'slider__wrapper--is-horizontal': orientation === Orientation.HORIZONTAL,
                     'slider__wrapper--is-vertical': orientation === Orientation.VERTICAL,
+                    'slider__wrapper--is-single-slide-view': singleSlideView,
                 })}
             >
                 {Children.map(children, (child, index: number) => (

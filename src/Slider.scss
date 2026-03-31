@@ -50,5 +50,18 @@
     &__slide {
       scroll-snap-align: start;
     }
+
+    &--is-single-slide-view {
+      scroll-snap-type: both mandatory;
+
+      &.slider__wrapper--is-dragging {
+        scroll-snap-type: initial;
+      }
+
+      .slider__wrapper__slide {
+        flex: 1 0 100%;
+        scroll-snap-align: center;
+      }
+    }
   }
 }
