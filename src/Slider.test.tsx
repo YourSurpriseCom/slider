@@ -644,5 +644,132 @@ describe('Slider', () => {
             expect(ref.current?.getLastFullyVisibleSlideIndex()).toBe(2);
         });
     });
+
+    describe('single slide', () => {
+        it('snaps to the next slide after dragging past the threshold', async () => {
+            renderSliderWithDimensions({}, { singleSlideView: true });
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+            const slides = screen.getAllByRole('listitem');
+            const scrollElement = screen.getByRole('list');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 1000 });
+                Object.defineProperty(child, 'offsetLeft', { value: 1000 * i });
+            });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[0] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: -10, clientY: 0 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+            });
+        });
+
+        it('snaps to the previous slide after dragging past the threshold', async () => {
+            renderSliderWithDimensions({ scrollLeft: 1000 }, { singleSlideView: true });
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+            const slides = screen.getAllByRole('listitem');
+            const scrollElement = screen.getByRole('list');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 1000 });
+                Object.defineProperty(child, 'offsetLeft', { value: 1000 * i });
+            });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[1] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 10, clientY: 0 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+            });
+        });
+
+        it('snaps to the next slide after dragging past the threshold vertically', async () => {
+            renderSliderWithDimensions({}, { singleSlideView: true, orientation: Orientation.VERTICAL });
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+            const slides = screen.getAllByRole('listitem');
+            const scrollElement = screen.getByRole('list');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientHeight', { configurable: true, value: 1000 });
+                Object.defineProperty(child, 'offsetTop', { value: 1000 * i });
+            });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[0] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 0, clientY: -10 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+            });
+        });
+
+        it('snaps to the previous slide after dragging past the threshold vertically', async () => {
+            renderSliderWithDimensions({ scrollTop: 1000 }, { singleSlideView: true, orientation: Orientation.VERTICAL });
+
+            const intersectionObserverInstance = getIntersectionObserverInstance();
+            const [intersectionCallback] = intersectionObserverInstance;
+            const slides = screen.getAllByRole('listitem');
+            const scrollElement = screen.getByRole('list');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientHeight', { configurable: true, value: 1000 });
+                Object.defineProperty(child, 'offsetTop', { value: 1000 * i });
+            });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[1] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 0, clientY: 10 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+            });
+        });
+
+        it('does not snap when drag is below the threshold', () => {
+            renderSliderWithDimensions({}, { singleSlideView: true });
+
+            const scrollElement = screen.getByRole('list');
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: -3, clientY: 0 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            expect(scrollToSpy).not.toHaveBeenCalled();
+        });
+    });
+
 });
 
