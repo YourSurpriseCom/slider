@@ -679,7 +679,7 @@ describe('Slider', () => {
             act(() => fireEvent.mouseUp(scrollElement));
 
             await waitFor(() => {
-                expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+                expect(scrollToSpy).toHaveBeenCalledWith({ behavior: 'smooth', left: 1000 });
             });
         });
 
@@ -697,7 +697,7 @@ describe('Slider', () => {
             act(() => fireEvent.mouseUp(scrollElement));
 
             await waitFor(() => {
-                expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+                expect(scrollToSpy).toHaveBeenCalledWith({ behavior: 'smooth', left: 0 });
             });
         });
 
@@ -715,7 +715,7 @@ describe('Slider', () => {
             act(() => fireEvent.mouseUp(scrollElement));
 
             await waitFor(() => {
-                expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+                expect(scrollToSpy).toHaveBeenCalledWith({ behavior: 'smooth', top: 1000 });
             });
         });
 
@@ -733,7 +733,7 @@ describe('Slider', () => {
             act(() => fireEvent.mouseUp(scrollElement));
 
             await waitFor(() => {
-                expect(scrollToSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+                expect(scrollToSpy).toHaveBeenCalledWith({ behavior: 'smooth', top: 0 });
             });
         });
 
