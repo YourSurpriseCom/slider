@@ -646,18 +646,27 @@ describe('Slider', () => {
     });
 
     describe('single slide', () => {
-        it('snaps to the next slide after dragging past the threshold', async () => {
-            renderSliderWithDimensions({}, { singleSlideView: true });
+        type SetupOptions = { scrollLeft?: number; scrollTop?: number; orientation?: Orientation };
 
-            const intersectionObserverInstance = getIntersectionObserverInstance();
-            const [intersectionCallback] = intersectionObserverInstance;
+        const setup = ({ scrollLeft = 0, scrollTop = 0, orientation = Orientation.HORIZONTAL }: SetupOptions = {}) => {
+            renderSliderWithDimensions({ scrollLeft, scrollTop }, { singleSlideView: true, orientation });
+
+            const [intersectionCallback] = getIntersectionObserverInstance();
             const slides = screen.getAllByRole('listitem');
             const scrollElement = screen.getByRole('list');
 
             slides.forEach((child, i) => {
                 Object.defineProperty(child, 'clientWidth', { configurable: true, value: 1000 });
                 Object.defineProperty(child, 'offsetLeft', { value: 1000 * i });
+                Object.defineProperty(child, 'clientHeight', { configurable: true, value: 1000 });
+                Object.defineProperty(child, 'offsetTop', { value: 1000 * i });
             });
+
+            return { intersectionCallback, slides, scrollElement };
+        };
+
+        it('snaps to the next slide after dragging past the threshold', async () => {
+            const { intersectionCallback, slides, scrollElement } = setup();
 
             act(() => {
                 intersectionCallback([
@@ -675,17 +684,7 @@ describe('Slider', () => {
         });
 
         it('snaps to the previous slide after dragging past the threshold', async () => {
-            renderSliderWithDimensions({ scrollLeft: 1000 }, { singleSlideView: true });
-
-            const intersectionObserverInstance = getIntersectionObserverInstance();
-            const [intersectionCallback] = intersectionObserverInstance;
-            const slides = screen.getAllByRole('listitem');
-            const scrollElement = screen.getByRole('list');
-
-            slides.forEach((child, i) => {
-                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 1000 });
-                Object.defineProperty(child, 'offsetLeft', { value: 1000 * i });
-            });
+            const { intersectionCallback, slides, scrollElement } = setup({ scrollLeft: 1000 });
 
             act(() => {
                 intersectionCallback([
@@ -703,17 +702,7 @@ describe('Slider', () => {
         });
 
         it('snaps to the next slide after dragging past the threshold vertically', async () => {
-            renderSliderWithDimensions({}, { singleSlideView: true, orientation: Orientation.VERTICAL });
-
-            const intersectionObserverInstance = getIntersectionObserverInstance();
-            const [intersectionCallback] = intersectionObserverInstance;
-            const slides = screen.getAllByRole('listitem');
-            const scrollElement = screen.getByRole('list');
-
-            slides.forEach((child, i) => {
-                Object.defineProperty(child, 'clientHeight', { configurable: true, value: 1000 });
-                Object.defineProperty(child, 'offsetTop', { value: 1000 * i });
-            });
+            const { intersectionCallback, slides, scrollElement } = setup({ orientation: Orientation.VERTICAL });
 
             act(() => {
                 intersectionCallback([
@@ -731,17 +720,7 @@ describe('Slider', () => {
         });
 
         it('snaps to the previous slide after dragging past the threshold vertically', async () => {
-            renderSliderWithDimensions({ scrollTop: 1000 }, { singleSlideView: true, orientation: Orientation.VERTICAL });
-
-            const intersectionObserverInstance = getIntersectionObserverInstance();
-            const [intersectionCallback] = intersectionObserverInstance;
-            const slides = screen.getAllByRole('listitem');
-            const scrollElement = screen.getByRole('list');
-
-            slides.forEach((child, i) => {
-                Object.defineProperty(child, 'clientHeight', { configurable: true, value: 1000 });
-                Object.defineProperty(child, 'offsetTop', { value: 1000 * i });
-            });
+            const { intersectionCallback, slides, scrollElement } = setup({ scrollTop: 1000, orientation: Orientation.VERTICAL });
 
             act(() => {
                 intersectionCallback([
@@ -759,9 +738,7 @@ describe('Slider', () => {
         });
 
         it('does not snap when drag is below the threshold', () => {
-            renderSliderWithDimensions({}, { singleSlideView: true });
-
-            const scrollElement = screen.getByRole('list');
+            const { scrollElement } = setup();
 
             act(() => fireEvent.mouseDown(scrollElement));
             act(() => fireEvent.mouseMove(scrollElement, { clientX: -3, clientY: 0 }));
