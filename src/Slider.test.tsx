@@ -644,5 +644,109 @@ describe('Slider', () => {
             expect(ref.current?.getLastFullyVisibleSlideIndex()).toBe(2);
         });
     });
+
+    describe('single slide', () => {
+        type SetupOptions = { scrollLeft?: number; scrollTop?: number; orientation?: Orientation };
+
+        const setup = ({ scrollLeft = 0, scrollTop = 0, orientation = Orientation.HORIZONTAL }: SetupOptions = {}) => {
+            renderSliderWithDimensions({ scrollLeft, scrollTop }, { singleSlideView: true, orientation });
+
+            const [intersectionCallback] = getIntersectionObserverInstance();
+            const slides = screen.getAllByRole('listitem');
+            const scrollElement = screen.getByRole('list');
+
+            slides.forEach((child, i) => {
+                Object.defineProperty(child, 'clientWidth', { configurable: true, value: 1000 });
+                Object.defineProperty(child, 'offsetLeft', { value: 1000 * i });
+                Object.defineProperty(child, 'clientHeight', { configurable: true, value: 1000 });
+                Object.defineProperty(child, 'offsetTop', { value: 1000 * i });
+            });
+
+            return { intersectionCallback, slides, scrollElement };
+        };
+
+        it('snaps to the next slide after dragging past the threshold', async () => {
+            const { intersectionCallback, slides, scrollElement } = setup();
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[0] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: -10, clientY: 0 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({ behavior: 'smooth', left: 1000 });
+            });
+        });
+
+        it('snaps to the previous slide after dragging past the threshold', async () => {
+            const { intersectionCallback, slides, scrollElement } = setup({ scrollLeft: 1000 });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[1] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 10, clientY: 0 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({ behavior: 'smooth', left: 0 });
+            });
+        });
+
+        it('snaps to the next slide after dragging past the threshold vertically', async () => {
+            const { intersectionCallback, slides, scrollElement } = setup({ orientation: Orientation.VERTICAL });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[0] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 0, clientY: -10 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({ behavior: 'smooth', top: 1000 });
+            });
+        });
+
+        it('snaps to the previous slide after dragging past the threshold vertically', async () => {
+            const { intersectionCallback, slides, scrollElement } = setup({ scrollTop: 1000, orientation: Orientation.VERTICAL });
+
+            act(() => {
+                intersectionCallback([
+                    { intersectionRatio: 1, target: slides[1] } as unknown as IntersectionObserverEntry,
+                ], mockIntersectionObserver.mock.instances[0]);
+            });
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: 0, clientY: 10 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            await waitFor(() => {
+                expect(scrollToSpy).toHaveBeenCalledWith({ behavior: 'smooth', top: 0 });
+            });
+        });
+
+        it('does not snap when drag is below the threshold', () => {
+            const { scrollElement } = setup();
+
+            act(() => fireEvent.mouseDown(scrollElement));
+            act(() => fireEvent.mouseMove(scrollElement, { clientX: -3, clientY: 0 }));
+            act(() => fireEvent.mouseUp(scrollElement));
+
+            expect(scrollToSpy).not.toHaveBeenCalled();
+        });
+    });
+
 });
 
