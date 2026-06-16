@@ -3,16 +3,20 @@ on:
   push:
     tags:
       - '*'
+
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC
+      contents: read
     steps:
       - name: Check out repository code
         uses: actions/checkout@v6
       - name: Setup node
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
       - name: Install
         run: npm ci
@@ -27,5 +31,3 @@ jobs:
           else
             npm publish
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
