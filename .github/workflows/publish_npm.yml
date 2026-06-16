@@ -18,7 +18,6 @@ jobs:
         with:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
-          package-manager-cache: false  # never use caching in release builds
       - name: Install
         run: npm ci
       - name: Build
@@ -28,7 +27,7 @@ jobs:
       - name: Publish
         run: |
           if [[ ${{ github.ref_name }} == *"beta"* ]]; then
-            npm publish --tag beta --provenance --access public
+            npm publish --tag beta
           else
-            npm publish --provenance --access public
+            npm publish
           fi
