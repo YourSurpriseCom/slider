@@ -3,13 +3,13 @@ on:
   push:
     tags:
       - '*'
-permissions:
-  id-token: write  # Required for OIDC
-  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC
+      contents: read
     steps:
       - name: Check out repository code
         uses: actions/checkout@v6
@@ -28,7 +28,7 @@ jobs:
       - name: Publish
         run: |
           if [[ ${{ github.ref_name }} == *"beta"* ]]; then
-            npm publish --tag beta
+            npm publish --tag beta --provenance
           else
-            npm publish
+            npm publish --provenance
           fi
