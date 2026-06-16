@@ -3,6 +3,10 @@ on:
   push:
     tags:
       - '*'
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -14,6 +18,7 @@ jobs:
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false  # never use caching in release builds
       - name: Install
         run: npm ci
       - name: Build
@@ -27,5 +32,3 @@ jobs:
           else
             npm publish
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
